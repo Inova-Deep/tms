@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { 
   HelpCircle, 
   LayoutDashboard, 
+  Grid3x3,
   Users, 
   BookOpen, 
   BadgeCheck, 
@@ -50,6 +51,14 @@ import {
               <h3 class="text-heading-sm">Dashboard</h3>
             </div>
             <p class="table-cell-secondary">View overall compliance metrics, expiring certifications, and coverage statistics across departments and sites.</p>
+          </div>
+
+          <div class="requirement-section">
+            <div class="header-info-row">
+              <Grid3x3 class="icon-standard text-slate-600" />
+              <h3 class="text-heading-sm">Training Matrix</h3>
+            </div>
+            <p class="table-cell-secondary">Visual grid showing all employees vs all courses. Click any cell to view training details and history. Color-coded status indicators show compliance at a glance.</p>
           </div>
 
           <div class="requirement-section">
@@ -105,7 +114,76 @@ import {
 
     <Card>
       <CardHeader>
-        <CardTitle class="sheet-title">Color Guide</CardTitle>
+        <CardTitle class="sheet-title">Training Matrix Guide</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p class="table-cell-secondary mb-4">
+          The Training Matrix provides a comprehensive view of training compliance across your entire organization.
+        </p>
+        <div class="table-container">
+          <table class="w-full">
+            <thead class="table-header">
+              <tr>
+                <th class="table-header-cell">Cell Color</th>
+                <th class="table-header-cell">Status</th>
+                <th class="table-header-cell">Meaning</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="table-row">
+                <td class="table-cell">
+                  <div class="matrix-legend-cell matrix-legend-valid">
+                    <span class="matrix-legend-check">✓</span>
+                  </div>
+                </td>
+                <td class="table-cell table-cell-primary">Valid</td>
+                <td class="table-cell table-cell-secondary">Training is current and valid (expiry > 90 days)</td>
+              </tr>
+              <tr class="table-row">
+                <td class="table-cell">
+                  <div class="matrix-legend-cell matrix-legend-expiring">
+                    <span class="matrix-legend-warning">⚠</span>
+                  </div>
+                </td>
+                <td class="table-cell table-cell-primary">Expiring</td>
+                <td class="table-cell table-cell-secondary">Training expires within 90 days</td>
+              </tr>
+              <tr class="table-row">
+                <td class="table-cell">
+                  <div class="matrix-legend-cell matrix-legend-expired">
+                    <span class="matrix-legend-x">✗</span>
+                  </div>
+                </td>
+                <td class="table-cell table-cell-primary">Expired</td>
+                <td class="table-cell table-cell-secondary">Training has passed its expiry date</td>
+              </tr>
+              <tr class="table-row">
+                <td class="table-cell">
+                  <div class="matrix-legend-cell matrix-legend-not-taken">
+                    <span class="matrix-legend-dash">—</span>
+                  </div>
+                </td>
+                <td class="table-cell table-cell-primary">Not Taken</td>
+                <td class="table-cell table-cell-secondary">Required training not yet completed</td>
+              </tr>
+              <tr class="table-row">
+                <td class="table-cell">
+                  <div class="matrix-legend-cell matrix-legend-not-required">
+                    <span class="matrix-legend-empty"></span>
+                  </div>
+                </td>
+                <td class="table-cell table-cell-primary">Not Required</td>
+                <td class="table-cell table-cell-secondary">Course not in employee's profile</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </CardContent>
+    </Card>
+
+    <Card>
+      <CardHeader>
+        <CardTitle class="sheet-title">Status Color Guide</CardTitle>
       </CardHeader>
       <CardContent>
         <div class="table-container">
@@ -113,7 +191,7 @@ import {
             <thead class="table-header">
               <tr>
                 <th class="table-header-cell">Status</th>
-                <th class="table-header-cell">Color</th>
+                <th class="table-header-cell">Badge</th>
                 <th class="table-header-cell">Meaning</th>
               </tr>
             </thead>
@@ -172,7 +250,7 @@ import {
 
           <div class="requirement-section">
             <h3 class="requirement-title">5. Monitor Compliance</h3>
-            <p class="table-cell-secondary">Check the <strong>Dashboard</strong> to monitor overall compliance and identify expiring certifications.</p>
+            <p class="table-cell-secondary">Check the <strong>Dashboard</strong> for overall compliance or use the <strong>Training Matrix</strong> for a detailed employee-by-course view.</p>
           </div>
         </div>
       </CardContent>

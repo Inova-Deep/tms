@@ -1401,3 +1401,127 @@
   @apply h-4 w-4 text-slate-400;
   stroke-width: 1.5px;
 }
+
+/* ============================================
+   MATRIX DRILL-DOWN SHEET CLASSES
+   ============================================ */
+
+.matrix-cell-clickable {
+  @apply cursor-pointer;
+}
+
+.matrix-detail-status {
+  @apply flex justify-center py-4;
+}
+
+.matrix-status-badge {
+  @apply inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium;
+}
+
+.matrix-status-valid {
+  @apply bg-emerald-100 text-emerald-800;
+}
+
+.matrix-status-expiring {
+  @apply bg-amber-100 text-amber-800;
+}
+
+.matrix-status-expired {
+  @apply bg-rose-100 text-rose-800;
+}
+
+.matrix-status-not-taken {
+  @apply bg-slate-100 text-slate-600;
+}
+
+.matrix-detail-row {
+  @apply flex items-center gap-3 py-3 border-t border-slate-100;
+}
+
+.matrix-detail-section {
+  @apply pt-4 border-t border-slate-200 mt-4;
+}
+
+.matrix-detail-section-title {
+  @apply flex items-center gap-2 text-sm font-semibold text-slate-800 mb-3;
+}
+
+.matrix-evidence-list {
+  @apply space-y-2;
+}
+
+.matrix-evidence-item {
+  @apply flex items-center justify-between p-3 bg-slate-50 rounded-md;
+}
+
+.matrix-evidence-main {
+  @apply space-y-1;
+}
+
+.matrix-evidence-type {
+  @apply text-sm font-medium text-slate-700;
+}
+
+.matrix-evidence-date {
+  @apply text-xs text-slate-500;
+}
+
+.matrix-evidence-expiry {
+  @apply text-xs text-slate-500;
+}
+
+.matrix-detail-empty {
+  @apply text-center py-6 text-slate-500 text-sm;
+}
+
+/* ============================================
+   MATRIX LEGEND CLASSES (for Help page)
+   ============================================ */
+
+.matrix-legend-cell {
+  @apply w-8 h-8 rounded flex items-center justify-center text-sm font-medium;
+}
+
+.matrix-legend-valid {
+  @apply bg-emerald-100;
+}
+
+.matrix-legend-expiring {
+  @apply bg-amber-100;
+}
+
+.matrix-legend-expired {
+  @apply bg-rose-100;
+}
+
+.matrix-legend-not-taken {
+  @apply bg-slate-100;
+}
+
+.matrix-legend-not-required {
+  @apply bg-white border border-slate-200;
+}
+
+.matrix-legend-check {
+  @apply text-emerald-600;
+}
+
+.matrix-legend-warning {
+  @apply text-amber-600;
+}
+
+.matrix-legend-x {
+  @apply text-rose-600;
+}
+
+.matrix-legend-dash {
+  @apply text-slate-400;
+}
+
+/* ============================================
+   SHEET FOOTER SIMPLE
+   ============================================ */
+
+.sheet-footer-simple {
+  @apply flex justify-end gap-2 pt-4 border-t border-slate-200 mt-4;
+}
