@@ -128,7 +128,7 @@
 }
 
 .app-main {
-  @apply flex-1 flex flex-col transition-all duration-200;
+  @apply flex-1 flex flex-col transition-all duration-200 overflow-hidden;
 }
 
 .app-header {
@@ -148,7 +148,7 @@
 }
 
 .app-content {
-  @apply flex-1;
+  @apply flex-1 overflow-auto;
 }
 
 .app-content-wrapper {
@@ -168,7 +168,6 @@
 }
 
 .page-header-left {
-  @apply flex-1;
 }
 
 .page-title {
@@ -192,7 +191,7 @@
    ============================================ */
 
 .sidebar {
-  @apply h-screen sticky top-0;
+  @apply h-screen sticky top-0 shrink-0;
   @apply border-r border-slate-200 bg-white text-slate-700 flex flex-col transition-[width] duration-200 overflow-hidden;
 }
 
@@ -514,7 +513,6 @@
 }
 
 .dialog-footer-btn {
-  @apply flex-1;
 }
 
 /* ============================================
@@ -629,7 +627,6 @@
 }
 
 .sheet-footer-btn {
-  @apply flex-1;
 }
 
 .sheet-footer-split {
@@ -654,7 +651,6 @@
 }
 
 .btn-stretch {
-  @apply flex-1;
 }
 
 .btn-icon-sm {
@@ -1019,7 +1015,8 @@
   @apply grid grid-cols-1 lg:grid-cols-4 gap-6;
 }
 
-.employee-detail-sidebar {
+.employee-detail.sidebar {
+  @apply h-screen sticky top-0 shrink-0;
   @apply lg:col-span-1 space-y-4;
 }
 

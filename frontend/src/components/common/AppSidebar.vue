@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { LayoutDashboard, Users, BookOpen, BadgeCheck, CalendarRange, FileBadge2, Menu, User, ChevronUp, RefreshCw, LogOut, Loader2, HelpCircle, Grid3x3, GraduationCap } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
@@ -35,6 +35,24 @@ const isCollapsed = ref(false)
 const emit = defineEmits<{
   (e: 'collapse-change', value: boolean): void
 }>()
+
+// Responsive behavior: collapse on mobile/tablet
+const MOBILE_BREAKPOINT = 768 // md breakpoint
+
+function checkScreenSize() {
+  if (window.innerWidth < MOBILE_BREAKPOINT) {
+    isCollapsed.value = true
+  }
+}
+
+onMounted(() => {
+  checkScreenSize()
+  window.addEventListener('resize', checkScreenSize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkScreenSize)
+})
 
 watch(isCollapsed, (val) => {
   emit('collapse-change', val)
