@@ -211,3 +211,23 @@ type DrilldownEmployee struct {
 	Status     string `json:"status"`
 	ExpiryDate string `json:"expiryDate,omitempty"`
 }
+
+// MatrixCell represents a single cell in the training matrix
+type MatrixCell struct {
+	Status     string  `json:"status"`
+	ExpiryDate *string `json:"expiryDate,omitempty"`
+}
+
+// MatrixRow represents one employee row in the matrix
+type MatrixRow struct {
+	EmployeeID   string                `json:"employeeId"`
+	EmployeeName string                `json:"employeeName"`
+	Department   string                `json:"department"`
+	Cells        map[string]MatrixCell `json:"cells"`
+}
+
+// MatrixResponse is the full matrix response
+type MatrixResponse struct {
+	Courses []Course    `json:"courses"`
+	Rows    []MatrixRow `json:"rows"`
+}

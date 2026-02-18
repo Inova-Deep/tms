@@ -43,6 +43,7 @@ func main() {
 	eventRepo := &domain.EventRepository{DB: database}
 	certificationRepo := &domain.CertificationRepository{DB: database}
 	courseRepo := &domain.CourseRepository{DB: database}
+	matrixRepo := domain.NewMatrixRepository(database, employeeRepo, courseRepo, evidenceRepo, profileRepo)
 
 	// Initialize services
 	computationService := &logic.ComputationService{}
@@ -63,6 +64,7 @@ func main() {
 		CourseRepo:         courseRepo,
 		ComputationService: computationService,
 		DashboardService:   dashboardService,
+		MatrixRepo:         matrixRepo,
 	}
 
 	// Setup router

@@ -19,6 +19,7 @@ type Server struct {
 	CourseRepo         *domain.CourseRepository
 	ComputationService *logic.ComputationService
 	DashboardService   *logic.DashboardService
+	MatrixRepo         *domain.MatrixRepository
 }
 
 // Routes returns the API router
@@ -92,6 +93,8 @@ func (s *Server) Routes() chi.Router {
 			r.Get("/grid", s.GetDashboardGrid)
 			r.Get("/drilldown", s.GetDashboardDrilldown)
 		})
+
+		r.Get("/matrix", s.handleGetMatrix)
 	})
 
 	return r
@@ -951,6 +954,15 @@ func (s *Server) GetDashboardDrilldown(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	respondWithJSON(w, employees)
+}
+
+func (s *Server) handleGetMatrix(w http.ResponseWriter, r *http.Request) {
+	matrix, err := s.MatrixRepo.GetMatrix()
+	if err != nil {
+		respondWithError(w, "Failed to get matrix data", http.StatusInternalServerError)
+		return
+	}
+	respondWithJSON(w, matrix)
 }
 
 // ==================== Helpers ====================

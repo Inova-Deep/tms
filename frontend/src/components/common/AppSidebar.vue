@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
-import { LayoutDashboard, Users, BookOpen, BadgeCheck, CalendarRange, FileBadge2, Menu, User, ChevronUp, RefreshCw, LogOut, Loader2, HelpCircle } from 'lucide-vue-next'
+import { LayoutDashboard, Users, BookOpen, BadgeCheck, CalendarRange, FileBadge2, Menu, User, ChevronUp, RefreshCw, LogOut, Loader2, HelpCircle, Grid3x3, GraduationCap } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -23,6 +23,11 @@ type NavItem = {
   icon: any
 }
 
+type NavGroup = {
+  header: string
+  items: NavItem[]
+}
+
 const route = useRoute()
 const auth = useAuthStore()
 const isCollapsed = ref(false)
@@ -35,16 +40,33 @@ watch(isCollapsed, (val) => {
   emit('collapse-change', val)
 })
 
-const items: NavItem[] = [
-  { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
-  { label: 'Employees', to: '/employees', icon: Users },
-  { label: 'Courses', to: '/courses', icon: BookOpen },
-  { label: 'Profiles', to: '/profiles', icon: BadgeCheck },
-  { label: 'Sessions', to: '/sessions', icon: CalendarRange },
-  { label: 'Certifications', to: '/certifications', icon: FileBadge2 },
-  { label: 'My Training', to: '/my-training', icon: User },
-  { label: 'Help', to: '/help', icon: HelpCircle },
+const navGroups: NavGroup[] = [
+  {
+    header: 'Overview',
+    items: [
+      { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
+      { label: 'Training Matrix', to: '/matrix', icon: Grid3x3 },
+    ],
+  },
+  {
+    header: 'Resources',
+    items: [
+      { label: 'Employees', to: '/employees', icon: Users },
+      { label: 'Courses', to: '/courses', icon: BookOpen },
+    ],
+  },
+  {
+    header: 'Training',
+    items: [
+      { label: 'Profiles', to: '/profiles', icon: BadgeCheck },
+      { label: 'Sessions', to: '/sessions', icon: CalendarRange },
+      { label: 'Certifications', to: '/certifications', icon: FileBadge2 },
+    ],
+  },
 ]
+
+const myTrainingItem: NavItem = { label: 'My Training', to: '/my-training', icon: GraduationCap }
+const helpItem: NavItem = { label: 'Help', to: '/help', icon: HelpCircle }
 
 const sidebarWidth = computed(() => (isCollapsed.value ? 'sidebar-collapsed' : 'sidebar-expanded'))
 
@@ -77,17 +99,40 @@ const roleLabel = computed(() => (auth.isEmployee ? 'Employee' : 'Admin'))
 
     <!-- Navigation -->
     <nav class="sidebar-nav">
-      <RouterLink
-        v-for="item in items"
-        :key="item.to"
-        :to="item.to"
-        class="sidebar-nav-item"
-        :class="isActive(item.to) ? 'sidebar-nav-item-active' : 'sidebar-nav-item-inactive'"
-      >
-        <component :is="item.icon" class="icon-standard" />
-        <span v-if="!isCollapsed">{{ item.label }}</span>
-      </RouterLink>
+      <template v-for="group in navGroups" :key="group.header">
+        <div v-if="!isCollapsed" class="sidebar-group-header">{{ group.header }}</div>
+        <RouterLink
+          v-for="item in group.items"
+          :key="item.to"
+          :to="item.to"
+          class="sidebar-nav-item"
+          :class="isActive(item.to) ? 'sidebar-nav-item-active' : 'sidebar-nav-item-inactive'"
+        >
+          <component :is="item.icon" class="icon-standard" />
+          <span v-if="!isCollapsed">{{ item.label }}</span>
+        </RouterLink>
+      </template>
     </nav>
+
+    <!-- Bottom Links (My Training + Help) -->
+    <div class="sidebar-nav-bottom">
+      <RouterLink
+        :to="myTrainingItem.to"
+        class="sidebar-nav-item"
+        :class="isActive(myTrainingItem.to) ? 'sidebar-nav-item-active' : 'sidebar-nav-item-inactive'"
+      >
+        <component :is="myTrainingItem.icon" class="icon-standard" />
+        <span v-if="!isCollapsed">{{ myTrainingItem.label }}</span>
+      </RouterLink>
+      <RouterLink
+        :to="helpItem.to"
+        class="sidebar-nav-item"
+        :class="isActive(helpItem.to) ? 'sidebar-nav-item-active' : 'sidebar-nav-item-inactive'"
+      >
+        <component :is="helpItem.icon" class="icon-standard" />
+        <span v-if="!isCollapsed">{{ helpItem.label }}</span>
+      </RouterLink>
+    </div>
 
     <!-- User Section -->
     <div class="sidebar-footer">

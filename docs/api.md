@@ -15,8 +15,9 @@
 5. [Events](#5-events)
 6. [Certifications](#6-certifications)
 7. [Dashboard](#7-dashboard)
-8. [Error Responses](#8-error-responses)
-9. [Data Types](#9-data-types)
+8. [Training Matrix](#8-training-matrix)
+9. [Error Responses](#9-error-responses)
+10. [Data Types](#10-data-types)
 
 ---
 
@@ -1610,7 +1611,85 @@ curl "http://localhost:8080/api/dashboard/drilldown?mode=profile&groupBy=departm
 
 ---
 
-## 8. Error Responses
+## 8. Training Matrix
+
+### 8.1 Get Training Matrix
+
+Retrieve the complete training matrix with all employees as rows and courses as columns.
+
+**Endpoint:** `GET /api/matrix`
+
+**Auth:** Required (Admin only)
+
+**Response:** `200 OK`
+```json
+{
+  "courses": [
+    {
+      "id": "C001",
+      "name": "H&S Induction",
+      "code": "HS-001",
+      "type": "course",
+      "description": "Health and Safety induction for all employees",
+      "validity_months": 24,
+      "created_at": "2026-01-15T10:00:00Z",
+      "updated_at": "2026-01-15T10:00:00Z"
+    }
+  ],
+  "rows": [
+    {
+      "employeeId": "E1001",
+      "employeeName": "Oliver Bennett",
+      "department": "Manufacturing",
+      "cells": {
+        "C001": {
+          "status": "valid",
+          "expiryDate": "2026-02-18"
+        },
+        "C002": {
+          "status": "expiring",
+          "expiryDate": "2026-04-03"
+        },
+        "C003": {
+          "status": "expired",
+          "expiryDate": "2025-12-15"
+        },
+        "C004": {
+          "status": "not_taken"
+        },
+        "C005": {
+          "status": "not_required"
+        }
+      }
+    }
+  ]
+}
+```
+
+**Cell Status Values:**
+
+| Status | Description |
+|--------|-------------|
+| `valid` | Evidence exists and expiry > 90 days (or never expires) |
+| `expiring` | Evidence exists and expiry within 90 days |
+| `expired` | Evidence exists and expiry date has passed |
+| `not_taken` | Course is required for employee but no evidence exists |
+| `not_required` | Course is not in employee's profile requirements |
+
+**Notes:**
+- `expiryDate` is only present for `valid`, `expiring`, and `expired` statuses
+- `not_required` cells indicate the employee's profile doesn't include this course
+- The matrix shows ALL courses for ALL employees, regardless of profile assignments
+
+**Example:**
+```bash
+curl http://localhost:8080/api/matrix \
+  -H "Authorization: Bearer <admin-token>"
+```
+
+---
+
+## 9. Error Responses
 
 All error responses follow a consistent format:
 
@@ -1659,7 +1738,7 @@ All error responses follow a consistent format:
 
 ---
 
-## 9. Data Types
+## 10. Data Types
 
 ### Employee
 
@@ -1770,6 +1849,22 @@ All error responses follow a consistent format:
 | `issueDate` | string | Date issued (YYYY-MM-DD) |
 | `expiryDate` | string | Expiry date (YYYY-MM-DD), empty if never expires |
 | `notes` | string | Additional notes |
+
+### MatrixCell
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | string | Cell status: `valid`, `expiring`, `expired`, `not_taken`, or `not_required` |
+| `expiryDate` | string | Expiry date (YYYY-MM-DD), only present for `valid`, `expiring`, `expired` statuses |
+
+### MatrixRow
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `employeeId` | string | Employee ID |
+| `employeeName` | string | Employee full name |
+| `department` | string | Department name |
+| `cells` | object | Map of course ID to `MatrixCell` |
 
 ---
 

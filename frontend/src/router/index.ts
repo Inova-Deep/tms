@@ -7,6 +7,7 @@ import ProfilesView from '@/views/ProfilesView.vue'
 import SessionsView from '@/views/SessionsView.vue'
 import CertificationsView from '@/views/CertificationsView.vue'
 import CoursesView from '@/views/CoursesView.vue'
+import MatrixView from '@/views/MatrixView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 
 const router = createRouter({
@@ -20,6 +21,7 @@ const router = createRouter({
     { path: '/sessions', component: SessionsView },
     { path: '/certifications', component: CertificationsView },
     { path: '/courses', component: CoursesView },
+    { path: '/matrix', component: MatrixView },
     { path: '/my-training', component: MyTrainingView },
     { path: '/help', name: 'Help', component: () => import('@/views/HelpView.vue') },
     { path: '/:pathMatch(.*)*', component: NotFoundView },

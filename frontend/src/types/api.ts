@@ -194,3 +194,20 @@ export interface CreateCertificationRequest {
   expiryDate?: string
   certificateNumber?: string
 }
+
+export interface MatrixCell {
+  status: 'valid' | 'expiring' | 'expired' | 'not_taken' | 'not_required'
+  expiryDate?: string
+}
+
+export interface MatrixRow {
+  employeeId: string
+  employeeName: string
+  department: string
+  cells: Record<string, MatrixCell>
+}
+
+export interface MatrixResponse {
+  courses: Course[]
+  rows: MatrixRow[]
+}
