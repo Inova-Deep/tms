@@ -12,9 +12,14 @@ RUN npm ci --legacy-peer-deps
 # Copy source code
 COPY . .
 
-# Build the application with increased memory
+# Set memory limit
 ENV NODE_OPTIONS="--max-old-space-size=4096"
-RUN npm run build
+
+# Run type-check first (fail fast on type errors)
+RUN npm run type-check
+
+# Then build (vite only, no type-check)
+RUN npm run build-only
 
 # Runtime stage with nginx
 FROM nginx:alpine
