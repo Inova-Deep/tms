@@ -7,12 +7,13 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 # Copy source code
 COPY . .
 
-# Build the application
+# Build the application with increased memory
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN npm run build
 
 # Runtime stage with nginx
