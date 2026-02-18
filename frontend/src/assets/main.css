@@ -989,7 +989,7 @@
 }
 
 .tabs-list-full {
-  @apply flex w-full justify-start;
+  @apply inline-flex;
 }
 
 .badge-text-sm {

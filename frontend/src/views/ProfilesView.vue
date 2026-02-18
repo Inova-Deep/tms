@@ -421,7 +421,7 @@ async function handleRemoveRequirement(reqId: string) {
 
     <!-- Create Profile Sheet -->
     <Sheet :open="createSheetOpen" @update:open="(open) => !open && (createSheetOpen = false)">
-      <SheetContent class="sheet-content">
+      <SheetContent class="sheet-content-wide">
         <SheetHeader class="sheet-header">
           <SheetTitle>Create Profile</SheetTitle>
           <SheetDescription>Add a new competency profile.</SheetDescription>

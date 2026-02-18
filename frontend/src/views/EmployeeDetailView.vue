@@ -258,7 +258,7 @@ const getComplianceColor = (percent: number) => {
                       <TableCell colspan="4" class="table-empty">No training records found.</TableCell>
                     </TableRow>
                     <TableRow v-for="rec in records" :key="rec.id" class="table-row">
-                      <TableCell class="table-cell table-cell-primary">{{ rec.requirementName }}</TableCell>
+                      <TableCell class="table-cell table-cell-primary">{{ rec.course?.name || rec.requirementName || 'Unknown' }}</TableCell>
                       <TableCell class="table-cell">
                         <Badge variant="outline" class="badge-text-sm">{{ rec.evidenceType }}</Badge>
                       </TableCell>

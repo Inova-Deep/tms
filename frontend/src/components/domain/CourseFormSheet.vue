@@ -88,7 +88,7 @@ function close() {
 
 <template>
   <Sheet v-model:open="isOpen">
-    <SheetContent class="sheet-content">
+    <SheetContent class="sheet-content-wide">
       <SheetHeader class="sheet-header">
         <SheetTitle class="sheet-title">
           {{ isEditing ? 'Edit Course' : 'Add Course' }}
