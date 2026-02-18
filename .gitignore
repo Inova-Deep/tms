@@ -1,0 +1,79 @@
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment Variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Editor directories and files
+.idea/
+.vscode/
+*.swp
+*.swo
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Go (Backend)
+# Binaries for programs and plugins
+backend/server
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Go workspace file
+go.work
+
+# Validated database file (local only)
+backend/tms.db
+*.db
+*.sqlite
+data/
+
+# Frontend Build Output & Cache
+frontend/dist/
+dist/
+dist-ssr/
+build/
+coverage/
+.eslintcache
+*.tsbuildinfo
+
+# Vite
+*.timestamp-*-*.mjs
+
+# Testing
+cypress/videos/
+cypress/screenshots/
+__screenshots__/
+
+# Logs
+logs
+*.log

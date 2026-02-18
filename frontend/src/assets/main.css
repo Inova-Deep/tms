@@ -1,0 +1,1310 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.129 0.042 264.695);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.129 0.042 264.695);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.129 0.042 264.695);
+  --primary: oklch(0.208 0.042 265.755);
+  --primary-foreground: oklch(0.984 0.003 247.858);
+  --secondary: oklch(0.968 0.007 247.896);
+  --secondary-foreground: oklch(0.208 0.042 265.755);
+  --muted: oklch(0.968 0.007 247.896);
+  --muted-foreground: oklch(0.554 0.046 257.417);
+  --accent: oklch(0.968 0.007 247.896);
+  --accent-foreground: oklch(0.208 0.042 265.755);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.929 0.013 255.508);
+  --input: oklch(0.929 0.013 255.508);
+  --ring: oklch(0.704 0.04 256.788);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.984 0.003 247.858);
+  --sidebar-foreground: oklch(0.129 0.042 264.695);
+  --sidebar-primary: oklch(0.208 0.042 265.755);
+  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-accent: oklch(0.968 0.007 247.896);
+  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
+  --sidebar-border: oklch(0.929 0.013 255.508);
+  --sidebar-ring: oklch(0.704 0.04 256.788);
+}
+
+.dark {
+  --background: oklch(0.129 0.042 264.695);
+  --foreground: oklch(0.984 0.003 247.858);
+  --card: oklch(0.208 0.042 265.755);
+  --card-foreground: oklch(0.984 0.003 247.858);
+  --popover: oklch(0.208 0.042 265.755);
+  --popover-foreground: oklch(0.984 0.003 247.858);
+  --primary: oklch(0.929 0.013 255.508);
+  --primary-foreground: oklch(0.208 0.042 265.755);
+  --secondary: oklch(0.279 0.041 260.031);
+  --secondary-foreground: oklch(0.984 0.003 247.858);
+  --muted: oklch(0.279 0.041 260.031);
+  --muted-foreground: oklch(0.704 0.04 256.788);
+  --accent: oklch(0.279 0.041 260.031);
+  --accent-foreground: oklch(0.984 0.003 247.858);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.551 0.027 264.364);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.208 0.042 265.755);
+  --sidebar-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-accent: oklch(0.279 0.041 260.031);
+  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.551 0.027 264.364);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* ============================================
+   APP LAYOUT CLASSES
+   ============================================ */
+
+.app-container {
+  @apply min-h-screen bg-slate-50/50 text-slate-900 flex;
+}
+
+.app-main {
+  @apply flex-1 flex flex-col transition-all duration-200;
+}
+
+.app-header {
+  @apply border-b border-slate-200 bg-white;
+}
+
+.app-header-content {
+  @apply h-14 flex items-center justify-between;
+}
+
+.app-header-title {
+  @apply text-sm font-semibold text-slate-800;
+}
+
+.app-header-meta {
+  @apply flex items-center gap-3;
+}
+
+.app-content {
+  @apply flex-1;
+}
+
+.app-content-wrapper {
+  @apply mx-auto py-6 space-y-4;
+}
+
+/* ============================================
+   PAGE LAYOUT CLASSES
+   ============================================ */
+
+.page-section {
+  @apply space-y-4;
+}
+
+.page-header {
+  @apply flex flex-col gap-4 md:flex-row md:items-center md:justify-between;
+}
+
+.page-header-left {
+  @apply flex-1;
+}
+
+.page-title {
+  @apply text-lg font-semibold text-slate-900;
+}
+
+.page-description {
+  @apply text-sm text-slate-500;
+}
+
+.page-actions {
+  @apply flex items-center gap-2;
+}
+
+.page-meta {
+  @apply text-xs text-slate-500;
+}
+
+/* ============================================
+   SIDEBAR CLASSES
+   ============================================ */
+
+.sidebar {
+  @apply border-r border-slate-200 bg-white text-slate-700 flex flex-col transition-[width] duration-200;
+}
+
+.sidebar-collapsed {
+  @apply w-16;
+}
+
+.sidebar-expanded {
+  @apply w-64;
+}
+
+.sidebar-header {
+  @apply h-14 flex items-center justify-between px-3;
+}
+
+.sidebar-title {
+  @apply text-sm font-semibold tracking-tight text-slate-900;
+}
+
+.sidebar-toggle {
+  @apply flex h-9 w-9 items-center justify-center rounded hover:bg-slate-100 text-slate-500 ml-auto;
+}
+
+.sidebar-nav {
+  @apply flex-1 px-2 pb-4 space-y-1;
+}
+
+.sidebar-nav-item {
+  @apply flex items-center gap-3 rounded px-3 py-2 text-sm hover:bg-slate-50 transition-colors;
+}
+
+.sidebar-nav-item-active {
+  @apply bg-slate-50 text-slate-900 font-medium;
+}
+
+.sidebar-nav-item-inactive {
+  @apply text-slate-600;
+}
+
+.sidebar-footer {
+  @apply border-t border-slate-200 p-2;
+}
+
+.sidebar-user-trigger {
+  @apply w-full flex items-center gap-3 rounded p-2 hover:bg-slate-50 transition-colors text-left;
+}
+
+.sidebar-user-trigger-collapsed {
+  @apply justify-center;
+}
+
+.sidebar-avatar {
+  @apply h-8 w-8 shrink-0 rounded flex items-center justify-center text-xs font-semibold;
+}
+
+.sidebar-avatar-employee {
+  @apply bg-slate-100 text-slate-700;
+}
+
+.sidebar-avatar-admin {
+  @apply bg-slate-700 text-white;
+}
+
+.sidebar-user-info {
+  @apply flex-1 min-w-0;
+}
+
+.sidebar-user-name {
+  @apply text-sm font-medium text-slate-900 truncate;
+}
+
+.sidebar-user-role {
+  @apply text-xs text-slate-500;
+}
+
+/* ============================================
+   CARD CLASSES
+   ============================================ */
+
+.card-surface {
+  @apply bg-white border border-slate-300 rounded-md p-4;
+}
+
+.card-compact {
+  @apply p-3 space-y-1;
+}
+
+.card-section {
+  @apply space-y-3;
+}
+
+.card-row {
+  @apply flex items-center justify-between;
+}
+
+.card-row-compact {
+  @apply flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between;
+}
+
+/* ============================================
+   KPI CARD CLASSES
+   ============================================ */
+
+.kpi-grid {
+  @apply grid gap-3 sm:grid-cols-2 lg:grid-cols-4;
+}
+
+.kpi-card {
+  @apply p-3 space-y-1;
+}
+
+.kpi-label {
+  @apply text-xs text-slate-500;
+}
+
+.kpi-value {
+  @apply text-2xl font-semibold text-slate-900;
+}
+
+.kpi-value-warning {
+  @apply text-2xl font-semibold text-amber-700;
+}
+
+.kpi-value-danger {
+  @apply text-2xl font-semibold text-rose-700;
+}
+
+/* ============================================
+   TABLE CLASSES
+   ============================================ */
+
+.table-container {
+  @apply overflow-x-auto;
+}
+
+.table-header {
+  @apply bg-slate-100 text-slate-700 uppercase text-xs font-semibold;
+}
+
+.table-header-alt {
+  @apply bg-slate-50 border-b-2 border-slate-200;
+}
+
+.table-header-cell {
+  @apply text-left px-3 py-2 border-b border-slate-200;
+}
+
+.table-header-cell-alt {
+  @apply text-left px-4 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider;
+}
+
+.table-row {
+  @apply hover:bg-slate-50;
+}
+
+.table-row-alt {
+  @apply hover:bg-slate-50 transition-colors;
+}
+
+.table-cell {
+  @apply px-3 py-2 border-b border-slate-100;
+}
+
+.table-cell-alt {
+  @apply px-4 py-3 border-b border-slate-100;
+}
+
+.table-cell-primary {
+  @apply font-medium text-slate-900;
+}
+
+.table-cell-secondary {
+  @apply text-slate-600;
+}
+
+.table-cell-muted {
+  @apply text-slate-500;
+}
+
+.table-cell-mono {
+  @apply font-mono text-xs text-slate-600;
+}
+
+.table-cell-warning {
+  @apply text-amber-700;
+}
+
+.table-cell-danger {
+  @apply text-rose-700;
+}
+
+.table-empty {
+  @apply text-center text-sm text-slate-500 py-8;
+}
+
+.table-empty-cell {
+  @apply text-center py-8;
+}
+
+/* ============================================
+   FORM CLASSES
+   ============================================ */
+
+.form-grid {
+  @apply grid gap-4 py-4;
+}
+
+.form-row {
+  @apply grid grid-cols-4 items-center gap-4;
+}
+
+.form-row-simple {
+  @apply space-y-2;
+}
+
+.form-label {
+  @apply text-sm font-medium text-slate-700;
+}
+
+.form-label-right {
+  @apply text-right;
+}
+
+.form-label-required::after {
+  content: " *";
+  @apply text-rose-600;
+}
+
+.form-field {
+  @apply col-span-3;
+}
+
+.form-field-full {
+  @apply col-span-4;
+}
+
+.form-error {
+  @apply text-rose-600 text-xs;
+}
+
+.form-hint {
+  @apply text-xs text-slate-500;
+}
+
+/* ============================================
+   DIALOG CLASSES
+   ============================================ */
+
+.dialog-content {
+  @apply sm:max-w-lg;
+}
+
+.dialog-content-wide {
+  @apply sm:max-w-2xl;
+}
+
+.dialog-content-lg {
+  @apply sm:max-w-3xl;
+}
+
+/* ============================================
+   DATE TIME PICKER
+   ============================================ */
+
+.datetime-picker-trigger {
+  @apply w-full justify-start text-left font-normal;
+}
+
+.datetime-picker-placeholder {
+  @apply text-muted-foreground;
+}
+
+.datetime-picker-icon {
+  @apply mr-2 h-4 w-4 shrink-0;
+}
+
+.datetime-picker-popover {
+  @apply w-auto p-0;
+}
+
+.datetime-picker-time-row {
+  @apply flex items-center gap-2 border-t border-slate-200 px-3 py-2;
+}
+
+.datetime-picker-time-icon {
+  @apply h-4 w-4 text-slate-500 shrink-0;
+}
+
+.datetime-picker-time-select {
+  @apply h-8 w-20;
+}
+
+.datetime-picker-time-sep {
+  @apply text-slate-500 font-semibold;
+}
+
+.dialog-header-section {
+  @apply space-y-2;
+}
+
+.dialog-body {
+  @apply py-4;
+}
+
+.dialog-footer {
+  @apply flex items-center justify-end gap-2;
+}
+
+.dialog-footer-split {
+  @apply flex gap-2 w-full;
+}
+
+.dialog-footer-btn {
+  @apply flex-1;
+}
+
+/* ============================================
+   SHEET CLASSES (STANDARD)
+   ============================================ */
+
+/* Sheet Width Variants */
+.sheet-content {
+  @apply w-full sm:max-w-lg overflow-y-auto;
+}
+
+.sheet-content-wide {
+  @apply w-full sm:max-w-4xl flex flex-col overflow-hidden;
+}
+
+/* Sheet Header */
+.sheet-header {
+  @apply px-6 py-4 border-b border-slate-200 space-y-1;
+}
+
+.sheet-header-with-badge {
+  @apply px-6 py-4 border-b border-slate-200;
+}
+
+.sheet-title {
+  @apply text-base font-semibold text-slate-900;
+}
+
+.sheet-description {
+  @apply text-sm text-slate-500;
+}
+
+/* Identity header block (for entity sheets) */
+.sheet-header-identity {
+  @apply px-6 py-4 border-b border-slate-100 shrink-0 space-y-2;
+}
+
+.sheet-identity-row {
+  @apply flex items-center gap-3;
+}
+
+.sheet-identity-icon {
+  @apply flex items-center justify-center w-9 h-9 rounded-md bg-slate-100 text-slate-600 shrink-0;
+}
+
+.sheet-identity-info {
+  @apply flex-1 min-w-0;
+}
+
+.sheet-identity-title {
+  @apply text-sm font-semibold text-slate-900 leading-tight;
+}
+
+.sheet-identity-desc {
+  @apply text-xs text-slate-500 mt-0.5;
+}
+
+.sheet-identity-badge {
+  @apply self-start font-mono text-xs;
+}
+
+/* Sheet Body */
+.sheet-body {
+  @apply flex-1 overflow-y-auto px-6 py-4;
+}
+
+.sheet-body-section {
+  @apply space-y-6 py-4;
+}
+
+.sheet-body-scroll {
+  @apply flex-1 overflow-y-auto;
+}
+
+/* Tabs inside sheet */
+.sheet-tabs {
+  @apply flex flex-col h-full;
+}
+
+.sheet-tabs-header {
+  @apply px-6 py-3 border-b border-slate-100 bg-white sticky top-0 z-10;
+}
+
+.sheet-tab-content {
+  @apply px-6 py-4;
+}
+
+/* Tab panel with padding */
+.tab-panel {
+  @apply p-4 bg-white rounded-md border border-slate-200;
+}
+
+.tab-panel-header {
+  @apply flex items-center justify-between mb-4;
+}
+
+.tab-panel-title {
+  @apply text-sm font-semibold text-slate-800;
+}
+
+/* Sheet Footer */
+.sheet-footer {
+  @apply shrink-0 px-6 py-4 border-t border-slate-200 bg-white;
+}
+
+.sheet-footer-fixed {
+  @apply shrink-0 flex flex-row gap-2 px-6 py-4 border-t border-slate-100 bg-white;
+}
+
+.sheet-footer-actions {
+  @apply flex gap-2 w-full;
+}
+
+.sheet-footer-btn {
+  @apply flex-1;
+}
+
+.sheet-footer-split {
+  @apply flex gap-3 pt-4 border-t border-slate-100;
+}
+
+/* Legacy compatibility */
+.sheet-header-section {
+  @apply space-y-1 pb-4 border-b border-slate-200;
+}
+
+/* ============================================
+   BUTTON LAYOUT CLASSES
+   ============================================ */
+
+.btn-group {
+  @apply flex items-center gap-2;
+}
+
+.btn-group-split {
+  @apply flex gap-2 w-full;
+}
+
+.btn-stretch {
+  @apply flex-1;
+}
+
+.btn-icon-sm {
+  @apply h-8 w-8;
+}
+
+/* ============================================
+   BADGE/VARIANT CLASSES
+   ============================================ */
+
+.status-badge {
+  @apply text-xs font-medium px-2 py-0.5 rounded;
+}
+
+.status-badge-success {
+  @apply bg-emerald-50 text-emerald-700 border border-emerald-200;
+}
+
+.status-badge-warning {
+  @apply bg-amber-50 text-amber-700 border border-amber-200;
+}
+
+.status-badge-danger {
+  @apply bg-rose-50 text-rose-700 border border-rose-200;
+}
+
+.status-badge-neutral {
+  @apply bg-slate-100 text-slate-700 border border-slate-200;
+}
+
+/* ============================================
+   LOADING/EMPTY STATES
+   ============================================ */
+
+.loading-container {
+  @apply flex h-[200px] items-center justify-center rounded-md border border-dashed;
+}
+
+.loading-content {
+  @apply flex flex-col items-center gap-2 text-muted-foreground;
+}
+
+.empty-state {
+  @apply flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed;
+}
+
+.empty-state-content {
+  @apply mx-auto flex max-w-[420px] flex-col items-center justify-center text-center;
+}
+
+.empty-state-icon {
+  @apply flex h-20 w-20 items-center justify-center rounded-full bg-slate-100;
+}
+
+.empty-state-icon-inner {
+  @apply h-10 w-10 text-slate-400;
+}
+
+.empty-state-title {
+  @apply mt-4 text-lg font-semibold;
+}
+
+.empty-state-description {
+  @apply mb-4 mt-2 text-sm text-muted-foreground;
+}
+
+.error-container {
+  @apply flex h-[200px] items-center justify-center rounded-md border border-dashed border-red-200 bg-red-50;
+}
+
+.error-text {
+  @apply text-red-500;
+}
+
+/* ============================================
+   ERROR BAR CLASSES
+   ============================================ */
+
+.error-bar {
+  @apply border-b border-amber-300 bg-amber-50;
+}
+
+.error-bar-content {
+  @apply max-w-7xl mx-auto px-4 md:px-6 py-3 space-y-2;
+}
+
+.error-bar-item {
+  @apply flex items-start justify-between gap-3 text-sm text-amber-900;
+}
+
+.error-bar-message {
+  @apply flex items-start gap-2;
+}
+
+.error-bar-text {
+  @apply font-semibold;
+}
+
+.error-bar-detail {
+  @apply text-xs text-amber-800;
+}
+
+.error-bar-dismiss {
+  @apply text-amber-800 hover:text-amber-900 hover:bg-amber-100 rounded-md p-1;
+}
+
+/* ============================================
+   PROGRESS BAR CLASSES
+   ============================================ */
+
+.progress-bar-container {
+  @apply flex items-center gap-2;
+}
+
+.progress-bar {
+  @apply h-2.5 w-24 rounded-full bg-slate-200;
+}
+
+.progress-bar-fill {
+  @apply h-2.5 rounded-full bg-slate-700 transition-all;
+}
+
+.progress-bar-label {
+  @apply text-xs font-semibold text-slate-700;
+}
+
+/* Progress bar widths */
+.progress-w-full { @apply w-full; }
+.progress-w-11-12 { @apply w-11/12; }
+.progress-w-5-6 { @apply w-5/6; }
+.progress-w-3-4 { @apply w-3/4; }
+.progress-w-2-3 { @apply w-2/3; }
+.progress-w-1-2 { @apply w-1/2; }
+.progress-w-1-3 { @apply w-1/3; }
+.progress-w-1-4 { @apply w-1/4; }
+
+/* ============================================
+   FILTER BAR CLASSES
+   ============================================ */
+
+.filter-bar {
+  @apply border-b border-slate-200 p-4;
+}
+
+.filter-row {
+  @apply flex flex-col gap-3 md:flex-row md:items-center;
+}
+
+.filter-search-wrapper {
+  @apply relative flex-1 md:max-w-xs;
+}
+
+.filter-search-icon {
+  @apply absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400;
+}
+
+/* ============================================
+   PROFILE/REQUIREMENT CLASSES
+   ============================================ */
+
+.profile-list {
+  @apply grid gap-2 sm:grid-cols-2 lg:grid-cols-3;
+}
+
+.profile-item {
+  @apply flex items-center justify-between rounded border border-slate-200 px-3 py-2;
+}
+
+.profile-item-name {
+  @apply text-sm font-medium text-slate-700;
+}
+
+.requirement-section {
+  @apply bg-white border border-slate-300 rounded-md p-4 space-y-3;
+}
+
+.requirement-title {
+  @apply text-sm font-semibold text-slate-800;
+}
+
+.requirement-table-container {
+  @apply max-h-[320px] overflow-y-auto border border-slate-200 rounded-md;
+}
+
+/* ============================================
+   EMPLOYEE HEADER CLASSES
+   ============================================ */
+
+.employee-header {
+  @apply flex flex-col gap-6 md:flex-row md:items-start md:justify-between;
+}
+
+.employee-info {
+  @apply space-y-1;
+}
+
+.employee-name {
+  @apply text-xl font-semibold text-slate-900;
+}
+
+.employee-id {
+  @apply text-sm text-slate-500;
+}
+
+.employee-meta-grid {
+  @apply grid gap-3 text-sm sm:grid-cols-2;
+}
+
+.employee-meta-item {
+  @apply flex items-center gap-2 text-slate-600;
+}
+
+.employee-meta-icon {
+  @apply h-4 w-4 text-slate-400;
+}
+
+/* ============================================
+   DIVIDER/SEPARATOR CLASSES
+   ============================================ */
+
+.section-divider {
+  @apply border-t border-slate-200;
+}
+
+/* ============================================
+   ICON & LOADER CLASSES
+   ============================================ */
+
+.icon-standard {
+  @apply h-4 w-4 shrink-0;
+  stroke-width: 1.5px;
+}
+
+.loading-spinner {
+  @apply animate-spin rounded-full border-2 border-slate-900 mx-auto;
+}
+
+.loading-spinner-sm {
+  @apply h-4 w-4 border-b-2;
+}
+
+.loading-spinner-md {
+  @apply h-8 w-8 border-b-2;
+}
+
+.loading-spinner-lg {
+  @apply h-12 w-12 border-b-2;
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+.text-right { @apply text-right; }
+.text-center { @apply text-center; }
+.text-left { @apply text-left; }
+
+.truncate { @apply truncate; }
+.sr-only { @apply sr-only; }
+
+/* Arbitrary Height Fixes */
+.h-drilldown { @apply h-[450px]; }
+.h-skeleton-container { @apply h-[200px]; }
+
+/* ============================================
+   EXCLUSION CLASSES
+   ============================================ */
+
+.exclusion-card {
+  @apply flex items-center justify-between rounded border border-slate-200 px-3 py-3 bg-white;
+}
+
+.exclusion-reason {
+  @apply text-sm text-slate-600;
+}
+
+.exclusion-expired {
+  @apply text-rose-700 font-medium;
+}
+
+/* ============================================
+   ATTENDEE PANEL CLASSES
+   ============================================ */
+
+.attendee-panel {
+  @apply border border-slate-200 rounded-md p-3 space-y-2;
+}
+
+.attendee-list {
+  @apply max-h-48 overflow-y-auto border border-slate-100 rounded;
+}
+
+.attendee-item {
+  @apply flex items-center gap-2 px-3 py-2 hover:bg-slate-50 border-b border-slate-100 last:border-b-0 cursor-pointer;
+}
+
+.attendee-selected-count {
+  @apply inline-flex items-center justify-center min-w-[24px] h-6 px-1.5 text-xs font-semibold rounded-full bg-slate-700 text-white;
+}
+
+.attendee-item-info {
+  @apply flex flex-col flex-1 min-w-0;
+}
+
+.attendee-summary {
+  @apply flex items-center gap-2 pt-1 text-xs text-slate-500;
+}
+
+.attendee-names {
+  @apply truncate text-slate-400;
+}
+
+.edit-session-tabs {
+  @apply flex flex-col flex-1 min-h-0;
+}
+
+.edit-session-tablist {
+  @apply w-full flex-shrink-0;
+}
+
+.edit-session-sheet {
+  @apply flex flex-col w-full sm:max-w-2xl;
+}
+
+.edit-session-sheet-header {
+  @apply flex-shrink-0 px-6 pt-6 pb-4 border-b border-slate-100;
+}
+
+.edit-session-sheet-body {
+  @apply flex-1 min-h-0 overflow-hidden px-6 py-4 flex flex-col;
+}
+
+.edit-session-sheet-footer {
+  @apply flex-shrink-0 px-6 py-4 border-t border-slate-100;
+}
+
+
+.edit-session-tab-content {
+  @apply pt-4 flex-1 overflow-y-auto;
+}
+
+.tabs-list-full {
+  @apply w-full;
+}
+
+.badge-text-sm {
+  @apply text-xs;
+}
+
+.btn-icon-sm {
+  @apply h-7 w-7;
+}
+
+.session-card {
+  @apply flex flex-col;
+}
+/* ============================================
+   EMPLOYEE DETAIL DASHBOARD
+   ============================================ */
+
+.employee-detail-grid {
+  @apply grid grid-cols-1 lg:grid-cols-4 gap-6;
+}
+
+.employee-detail-sidebar {
+  @apply lg:col-span-1 space-y-4;
+}
+
+.employee-detail-main {
+  @apply lg:col-span-3 space-y-4;
+}
+
+.compliance-status-card {
+  @apply flex flex-col items-center justify-center p-6 text-center border-b border-slate-100;
+}
+
+.compliance-kpi-value {
+  @apply text-4xl font-bold mb-2;
+}
+
+.compliance-kpi-label {
+  @apply text-xs font-semibold uppercase tracking-wider text-slate-500;
+}
+
+.status-summary-list {
+  @apply divide-y divide-slate-100;
+}
+
+.status-summary-item {
+  @apply flex items-center justify-between py-2 text-sm;
+}
+
+.status-summary-count {
+  @apply font-mono font-semibold;
+}
+
+.meta-list {
+  @apply space-y-2;
+}
+
+.meta-list-item {
+  @apply flex items-center gap-2 text-sm text-slate-600;
+}
+
+.meta-list-icon {
+  @apply h-4 w-4 text-slate-400 shrink-0;
+}
+
+/* ============================================
+   MEMBERS TAB CLASSES
+   ============================================ */
+
+.members-tab-content {
+  @apply space-y-4;
+}
+
+.members-header {
+  @apply flex flex-col gap-3 md:flex-row md:items-center md:justify-between;
+}
+
+.members-search-input {
+  @apply pl-9;
+}
+
+.table-action-cell {
+  @apply w-12;
+}
+
+.table-action-cell-wide {
+  @apply w-24;
+}
+
+.btn-danger-ghost {
+  @apply text-rose-600 hover:text-rose-700 hover:bg-rose-50;
+}
+
+.badge-spacing {
+  @apply ml-2 text-xs;
+}
+
+.card-header-compact {
+  @apply pb-2;
+}
+
+.card-content-compact {
+  @apply space-y-2;
+}
+
+.card-footer-compact {
+  @apply pt-2;
+}
+
+.card-footer-full {
+  @apply pt-2 w-full;
+}
+
+.icon-muted {
+  @apply text-slate-400;
+}
+
+.tab-content {
+  @apply mt-4;
+}
+
+.tabs-list-full {
+  @apply w-full justify-start;
+}
+
+/* ============================================
+   STATUS COLORS
+   ============================================ */
+
+.text-status-valid { @apply text-emerald-500; }
+.text-status-expiring { @apply text-amber-500; }
+.text-status-expired { @apply text-rose-500; }
+.text-status-missing { @apply text-slate-400; }
+
+.compliance-high { @apply text-emerald-600; }
+.compliance-medium { @apply text-amber-600; }
+.compliance-low { @apply text-rose-600; }
+
+/* ============================================
+   BADGE & TAG UTILITIES
+   ============================================ */
+
+.badge-list { @apply flex flex-wrap gap-1.5; }
+.badge-text-sm { @apply text-xs font-normal; }
+
+/* ============================================
+   TAB UTILITIES
+   ============================================ */
+
+.tabs-full-width { @apply w-full; }
+.tabs-content { @apply mt-4; }
+
+/* ============================================
+   TABLE VISIBILITY
+   ============================================ */
+
+.table-cell-hidden-lg { @apply hidden lg:table-cell; }
+.table-cell-hidden-md { @apply hidden md:table-cell; }
+.table-cell-hidden-xl { @apply hidden xl:table-cell; }
+
+/* ============================================
+   SKELETON VARIANTS
+   ============================================ */
+/* Session Sheet Semantic Utilities */
+.session-sheet-badge-count {
+  @apply ml-2;
+}
+
+.session-sheet-btn-icon {
+  @apply mr-1;
+}
+
+.session-sheet-attendee-list {
+  @apply flex-1 overflow-y-auto px-1;
+}
+
+.session-sheet-attendee-item {
+  @apply flex items-center gap-3 p-3 rounded-md cursor-pointer transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent;
+}
+
+.session-sheet-attendee-item-active {
+  @apply bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800;
+}
+
+.skeleton-sm { @apply h-4 w-16; }
+.skeleton-md { @apply h-4 w-24; }
+.skeleton-lg { @apply h-4 w-32; }
+.skeleton-xl { @apply h-4 w-40; }
+.skeleton-badge { @apply h-5 w-16; }
+.skeleton-icon { @apply h-8 w-8; }
+
+/* ============================================
+   FILTER INPUT
+   ============================================ */
+
+.filter-input { @apply pl-9; }
+.dropdown-width-sm { @apply w-48; }
+.dropdown-width-md { @apply w-56; }
+
+/* ============================================
+   CARD HEADER STYLES
+   ============================================ */
+
+.card-header-bordered { @apply pb-2 border-b border-slate-50; }
+.card-content-spaced { @apply space-y-4; }
+
+/* ============================================
+   HEADER LAYOUT
+   ============================================ */
+
+.header-icon-row { @apply flex items-center gap-2 mb-1; }
+.header-info-row { @apply flex items-center gap-3; }
+.text-heading-sm { @apply text-sm font-medium text-slate-900; }
+
+/* ============================================
+   INFO GRID
+   ============================================ */
+
+.info-grid-4 { @apply grid gap-4 md:grid-cols-4; }
+.col-span-1 { @apply md:col-span-1; }
+.col-span-3 { @apply md:col-span-3; }
+
+/* ============================================
+   BACK BUTTON
+   ============================================ */
+
+.back-btn { @apply mb-2; }
+.title-row { @apply flex items-center gap-2; }
+
+/* ============================================
+   FORM LABEL SIZE
+   ============================================ */
+
+.form-label-xs { @apply text-xs; }
+
+/* ============================================
+   SEPARATOR SIZE
+   ============================================ */
+
+.separator-sm { @apply h-4; }
+
+/* ============================================
+   SESSIONS MODULE CLASSES
+   ============================================ */
+
+.sessions-grid {
+  @apply grid gap-4 md:grid-cols-2 lg:grid-cols-3;
+}
+
+.session-status-badge {
+  @apply text-xs font-medium px-2 py-0.5 rounded capitalize;
+}
+
+.session-status-scheduled {
+  @apply bg-slate-100 text-slate-700 border border-slate-200;
+}
+
+.session-status-draft {
+  @apply bg-slate-50 text-slate-500 border border-slate-200;
+}
+
+.session-status-completed {
+  @apply bg-emerald-50 text-emerald-700 border border-emerald-200;
+}
+
+.session-status-cancelled {
+  @apply bg-rose-50 text-rose-700 border border-rose-200;
+}
+
+.session-status-in-progress {
+  @apply bg-amber-50 text-amber-700 border border-amber-200;
+}
+
+/* Dialog scroll body */
+.dialog-scroll-body {
+  @apply space-y-3 max-h-72 overflow-y-auto px-1;
+}
+
+/* Icon with text margin */
+.icon-with-text {
+  @apply h-4 w-4 shrink-0 mr-2;
+}
+
+/* Attendee selection panel */
+.attendee-selection-panel {
+  @apply border border-slate-200 rounded-md p-3 space-y-2 bg-slate-50;
+}
+
+.attendee-selection-header {
+  @apply flex items-center gap-2 pb-2 border-b border-slate-200;
+}
+
+.attendee-selection-list {
+  @apply max-h-48 overflow-y-auto space-y-1;
+}
+
+.attendee-selection-item {
+  @apply flex items-center gap-2 p-2 rounded hover:bg-white;
+}
+
+.attendee-selection-item-selected {
+  @apply bg-white border border-slate-200;
+}
+
+.attendee-selection-count {
+  @apply text-xs text-slate-500 pt-2 border-t border-slate-200;
+}
+
+/* ============================================
+   COURSES VIEW CLASSES
+   ============================================ */
+
+.tabs-header-row {
+  @apply flex flex-col gap-3 md:flex-row md:items-center md:justify-between;
+}
+
+.tab-content-no-top {
+  @apply mt-0;
+}
