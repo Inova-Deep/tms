@@ -22,7 +22,7 @@ FROM alpine:3.19
 WORKDIR /app
 
 # Install ca-certificates for HTTPS, sqlite, and wget for healthcheck
-RUN apk add --no-cache ca-certificates sqlite-libs wget
+RUN apk add --no-cache ca-certificates sqlite-libs curl
 
 # Copy binary from builder
 COPY --from=builder /tms /app/tms
