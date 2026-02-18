@@ -1522,3 +1522,15 @@
 .sheet-footer-simple {
   @apply flex justify-end gap-2 pt-4 border-t border-slate-200 mt-4;
 }
+
+/* ============================================
+   LOADING INDICATOR CLASSES
+   ============================================ */
+
+.loading-indicator {
+  @apply flex items-center gap-2 text-slate-500;
+}
+
+.select-loading {
+  @apply flex items-center gap-2 px-2 py-1.5 text-slate-500 text-sm;
+}

@@ -30,7 +30,7 @@ import DateTimePicker from '@/components/ui/DateTimePicker.vue'
 import { useCreateEvent } from '@/composables/useEvents'
 import { useEmployees } from '@/composables/useEmployees'
 import { useCourses } from '@/composables/useCourses'
-import { Users, UserCheck, UserX } from 'lucide-vue-next'
+import { Users, UserCheck, UserX, Loader2 } from 'lucide-vue-next'
 
 const props = defineProps<{
     open: boolean
@@ -46,8 +46,8 @@ const isOpen = computed({
 })
 
 const { mutate: createSession, isPending } = useCreateEvent()
-const { data: employees } = useEmployees()
-const { data: courses } = useCourses('course')
+const { data: employees, isLoading: isLoadingEmployees } = useEmployees()
+const { data: courses, isLoading: isLoadingCourses } = useCourses('course')
 
 function getCurrentHour(): string {
     const now = new Date()
@@ -167,12 +167,23 @@ function handleSubmit() {
                                 <div class="form-row">
                                     <Label class="form-label form-label-right">Course</Label>
                                     <div class="form-field">
-                                        <Select v-model="form.courseId">
+                                        <Select v-model="form.courseId" :disabled="isLoadingCourses">
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select course" />
+                                                <SelectValue placeholder="Select course">
+                                                    <div v-if="isLoadingCourses" class="loading-indicator">
+                                                        <Loader2 class="icon-standard animate-spin" />
+                                                        <span>Loading courses...</span>
+                                                    </div>
+                                                    <span v-else-if="!form.courseId">Select course</span>
+                                                    <span v-else>{{ courses?.find(c => c.id === form.courseId)?.name }}</span>
+                                                </SelectValue>
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem v-for="course in courses" :key="course.id" :value="course.id">
+                                                <div v-if="isLoadingCourses" class="select-loading">
+                                                    <Loader2 class="icon-standard animate-spin" />
+                                                    <span>Loading...</span>
+                                                </div>
+                                                <SelectItem v-else v-for="course in courses" :key="course.id" :value="course.id">
                                                     {{ course.name }} ({{ course.validity_months }}mo)
                                                 </SelectItem>
                                             </SelectContent>
@@ -218,12 +229,23 @@ function handleSubmit() {
                                 <div class="form-row">
                                     <Label class="form-label form-label-right">Instructor</Label>
                                     <div class="form-field">
-                                        <Select v-model="form.instructorId">
+                                        <Select v-model="form.instructorId" :disabled="isLoadingEmployees">
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select instructor" />
+                                                <SelectValue placeholder="Select instructor">
+                                                    <div v-if="isLoadingEmployees" class="loading-indicator">
+                                                        <Loader2 class="icon-standard animate-spin" />
+                                                        <span>Loading...</span>
+                                                    </div>
+                                                    <span v-else-if="!form.instructorId">Select instructor</span>
+                                                    <span v-else>{{ employees?.find(e => e.id === form.instructorId)?.name }}</span>
+                                                </SelectValue>
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem v-for="emp in employees" :key="emp.id" :value="emp.id">
+                                                <div v-if="isLoadingEmployees" class="select-loading">
+                                                    <Loader2 class="icon-standard animate-spin" />
+                                                    <span>Loading...</span>
+                                                </div>
+                                                <SelectItem v-else v-for="emp in employees" :key="emp.id" :value="emp.id">
                                                     {{ emp.name }}
                                                 </SelectItem>
                                             </SelectContent>
@@ -237,7 +259,13 @@ function handleSubmit() {
                     <!-- Attendees Tab -->
                     <TabsContent value="attendees" class="sheet-tab-content">
                         <div class="tab-panel">
-                            <div class="attendee-selection-panel">
+                            <div v-if="isLoadingEmployees" class="loading-container">
+                                <div class="loading-content">
+                                    <Loader2 class="icon-standard animate-spin" />
+                                    <span>Loading employees...</span>
+                                </div>
+                            </div>
+                            <div v-else class="attendee-selection-panel">
                                 <div class="attendee-selection-header">
                                     <Input v-model="attendeeSearch" placeholder="Search employees..." class="btn-stretch" />
                                     <Button variant="outline" size="sm" @click="selectAllEligible">
