@@ -6,12 +6,12 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 func Init(dbPath string) (*sql.DB, error) {
-	// Ensure directory exists
 	dir := filepath.Dir(dbPath)
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return nil, fmt.Errorf("failed to create db directory: %w", err)
@@ -36,14 +36,38 @@ func Init(dbPath string) (*sql.DB, error) {
 }
 
 func runMigrations(db *sql.DB) error {
-	// Simple migration runner: read all .sql files in migrations/ and execute them.
-	// In production, use a proper migration tool like golang-migrate.
+	if _, err := db.Exec(`
+		CREATE TABLE IF NOT EXISTS schema_migrations (
+			version TEXT PRIMARY KEY,
+			applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+		)
+	`); err != nil {
+		return fmt.Errorf("failed to create schema_migrations table: %w", err)
+	}
+
 	files, err := filepath.Glob("migrations/*.sql")
 	if err != nil {
 		return err
 	}
 
+	sort.Strings(files)
+
 	for _, file := range files {
+		version := filepath.Base(file[:len(file)-4])
+
+		var exists bool
+		err := db.QueryRow(
+			"SELECT 1 FROM schema_migrations WHERE version = ?",
+			version,
+		).Scan(&exists)
+		if err == nil {
+			log.Printf("Skipping migration (already applied): %s", file)
+			continue
+		}
+		if err != sql.ErrNoRows {
+			return fmt.Errorf("failed to check migration status %s: %w", file, err)
+		}
+
 		content, err := os.ReadFile(file)
 		if err != nil {
 			return fmt.Errorf("failed to read migration file %s: %w", file, err)
@@ -52,6 +76,14 @@ func runMigrations(db *sql.DB) error {
 		if _, err := db.Exec(string(content)); err != nil {
 			return fmt.Errorf("failed to execute migration %s: %w", file, err)
 		}
+
+		if _, err := db.Exec(
+			"INSERT OR IGNORE INTO schema_migrations (version) VALUES (?)",
+			version,
+		); err != nil {
+			return fmt.Errorf("failed to record migration %s: %w", file, err)
+		}
+
 		log.Printf("Applied migration: %s", file)
 	}
 	return nil

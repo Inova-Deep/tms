@@ -103,11 +103,3 @@ CREATE INDEX IF NOT EXISTS idx_assignments_employee ON profile_assignments(emplo
 CREATE INDEX IF NOT EXISTS idx_assignments_profile ON profile_assignments(profile_id);
 CREATE INDEX IF NOT EXISTS idx_certifications_employee ON certifications(employee_id);
 CREATE INDEX IF NOT EXISTS idx_event_attendance_event ON event_attendance(event_id);
-
--- Migration tracking
-CREATE TABLE IF NOT EXISTS schema_migrations (
-    version TEXT PRIMARY KEY,
-    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-INSERT OR IGNORE INTO schema_migrations (version) VALUES ('001');
