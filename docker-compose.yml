@@ -6,8 +6,9 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: tms-backend
-    ports:
-      - "8080:8080"
+    # No external port mapping - Coolify handles this
+    expose:
+      - "8080"
     environment:
       - PORT=8080
       - DB_PATH=/app/data/tms.db
@@ -28,8 +29,9 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: tms-frontend
-    ports:
-      - "80:80"
+    # No external port mapping - Coolify handles this
+    expose:
+      - "80"
     depends_on:
       backend:
         condition: service_healthy
