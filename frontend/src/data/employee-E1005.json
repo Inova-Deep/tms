@@ -1,0 +1,21 @@
+{
+  "id": "E1005",
+  "name": "Jack Thompson",
+  "department": "Manufacturing",
+  "site": "Avonmouth Logistics & Workshop",
+  "worker_type": "Employee",
+  "cost_center": "CC200",
+  "employment_status": "Active",
+  "profile_status": {
+    "P1": "Eligible",
+    "P3": "At Risk"
+  },
+  "requirements": [
+    { "id": "R1", "profile_id": "P1", "name": "H&S Induction", "type": "course", "validity_months": 24, "status": "Valid", "expiry_date": "2026-12-15" },
+    { "id": "R2", "profile_id": "P1", "name": "Fire Safety Awareness", "type": "course", "validity_months": 12, "status": "Expiring", "expiry_date": "2026-04-03" },
+    { "id": "R3", "profile_id": "P1", "name": "Manual Handling", "type": "course", "validity_months": 12, "status": "Valid", "expiry_date": "2026-11-20" },
+    { "id": "R4", "profile_id": "P3", "name": "Forklift Theory (RTITB)", "type": "course", "validity_months": 36, "status": "Valid", "expiry_date": "2027-06-15" },
+    { "id": "R5", "profile_id": "P3", "name": "Forklift Practical Assessment", "type": "course", "validity_months": 36, "status": "Expiring", "expiry_date": "2026-05-10" },
+    { "id": "R6", "profile_id": "P3", "name": "Forklift Licence (RTITB/ITSSAR)", "type": "certification", "validity_months": 36, "status": "Missing", "expiry_date": null }
+  ]
+}

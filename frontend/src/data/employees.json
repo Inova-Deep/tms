@@ -1,0 +1,22 @@
+[
+  { "id": "E1001", "name": "Oliver Bennett", "department": "Manufacturing", "site": "Bristol Central Plant", "worker_type": "Employee", "cost_center": "CC100", "employment_status": "Active" },
+  { "id": "E1002", "name": "Amelia Clarke", "department": "Manufacturing", "site": "Bristol Central Plant", "worker_type": "Employee", "cost_center": "CC100", "employment_status": "Active" },
+  { "id": "E1003", "name": "Harry Patel", "department": "Maintenance", "site": "Bristol Central Plant", "worker_type": "Employee", "cost_center": "CC110", "employment_status": "Active" },
+  { "id": "E1004", "name": "Isla Hughes", "department": "Quality", "site": "Bristol Central Plant", "worker_type": "Employee", "cost_center": "CC120", "employment_status": "Active" },
+  { "id": "E1005", "name": "Jack Thompson", "department": "Manufacturing", "site": "Avonmouth Logistics & Workshop", "worker_type": "Employee", "cost_center": "CC200", "employment_status": "Active" },
+  { "id": "E1006", "name": "Emily Walker", "department": "Maintenance", "site": "Avonmouth Logistics & Workshop", "worker_type": "Employee", "cost_center": "CC210", "employment_status": "Active" },
+  { "id": "E1007", "name": "George Evans", "department": "Quality", "site": "Avonmouth Logistics & Workshop", "worker_type": "Employee", "cost_center": "CC220", "employment_status": "Active" },
+  { "id": "E1008", "name": "Sophia Khan", "department": "HR", "site": "Bristol Central Plant", "worker_type": "Employee", "cost_center": "CC130", "employment_status": "Active" },
+  { "id": "E1009", "name": "Noah Wilson", "department": "Manufacturing", "site": "Bristol Central Plant", "worker_type": "Contractor", "cost_center": "CC100", "employment_status": "Active" },
+  { "id": "E1010", "name": "Ava Morgan", "department": "Manufacturing", "site": "Avonmouth Logistics & Workshop", "worker_type": "Employee", "cost_center": "CC200", "employment_status": "Active" },
+  { "id": "E1011", "name": "Leo Robinson", "department": "Maintenance", "site": "Bristol Central Plant", "worker_type": "Employee", "cost_center": "CC110", "employment_status": "Active" },
+  { "id": "E1012", "name": "Mia Carter", "department": "Quality", "site": "Bristol Central Plant", "worker_type": "Employee", "cost_center": "CC120", "employment_status": "Active" },
+  { "id": "E1013", "name": "Ethan James", "department": "Manufacturing", "site": "Avonmouth Logistics & Workshop", "worker_type": "Employee", "cost_center": "CC200", "employment_status": "Active" },
+  { "id": "E1014", "name": "Grace Murphy", "department": "HR", "site": "Avonmouth Logistics & Workshop", "worker_type": "Employee", "cost_center": "CC230", "employment_status": "Active" },
+  { "id": "E1015", "name": "Freddie Brown", "department": "Manufacturing", "site": "Bristol Central Plant", "worker_type": "Employee", "cost_center": "CC100", "employment_status": "Active" },
+  { "id": "E1016", "name": "Lily Ward", "department": "Maintenance", "site": "Avonmouth Logistics & Workshop", "worker_type": "Contractor", "cost_center": "CC210", "employment_status": "Active" },
+  { "id": "E1017", "name": "Oscar Lewis", "department": "Quality", "site": "Avonmouth Logistics & Workshop", "worker_type": "Employee", "cost_center": "CC220", "employment_status": "Active" },
+  { "id": "E1018", "name": "Chloe Smith", "department": "Manufacturing", "site": "Bristol Central Plant", "worker_type": "Employee", "cost_center": "CC100", "employment_status": "Active" },
+  { "id": "E1019", "name": "Charlie Green", "department": "Maintenance", "site": "Bristol Central Plant", "worker_type": "Employee", "cost_center": "CC110", "employment_status": "Active" },
+  { "id": "E1020", "name": "Ella Davies", "department": "Manufacturing", "site": "Avonmouth Logistics & Workshop", "worker_type": "Employee", "cost_center": "CC200", "employment_status": "Active" }
+]
