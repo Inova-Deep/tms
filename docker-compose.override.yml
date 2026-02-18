@@ -1,0 +1,14 @@
+# Local development override
+# This file is automatically merged with docker-compose.yml
+# Coolify ignores this file (uses production compose only)
+
+version: '3.8'
+
+services:
+  backend:
+    ports:
+      - "8080:8080"
+
+  frontend:
+    ports:
+      - "80:80"
