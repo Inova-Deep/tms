@@ -15,8 +15,8 @@ COPY . .
 # Set memory limit
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 
-# Run type-check first (fail fast on type errors)
-RUN npm run type-check
+# Run type-check with verbose output
+RUN npx vue-tsc --noEmit --pretty 2>&1 || (echo "=== TypeScript Errors ===" && exit 1)
 
 # Then build (vite only, no type-check)
 RUN npm run build-only
