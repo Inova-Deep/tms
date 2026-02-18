@@ -192,7 +192,8 @@
    ============================================ */
 
 .sidebar {
-  @apply border-r border-slate-200 bg-white text-slate-700 flex flex-col transition-[width] duration-200;
+  @apply h-screen sticky top-0;
+  @apply border-r border-slate-200 bg-white text-slate-700 flex flex-col transition-[width] duration-200 overflow-hidden;
 }
 
 .sidebar-collapsed {
