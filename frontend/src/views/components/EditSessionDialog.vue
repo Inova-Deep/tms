@@ -294,14 +294,16 @@ function handleSubmit() {
                     v-for="emp in filteredEmployees" 
                     :key="emp.id" 
                     class="attendee-selection-item"
-                    :class="{ 'attendee-selection-item-selected': isAttendeeSelected(emp.id) }"
+                    :class="{ 'attendee-selection-item-selected': form.attendees.includes(emp.id) }"
+                    @click="toggleAttendee(emp.id)"
                   >
                     <Checkbox 
                       :id="'edit-attendee-' + emp.id"
-                      :checked="isAttendeeSelected(emp.id)"
-                      @update:checked="toggleAttendee(emp.id)" 
+                      :model-value="form.attendees.includes(emp.id)"
+                      @update:model-value="toggleAttendee(emp.id)"
+                      @click.stop
                     />
-                    <label :for="'edit-attendee-' + emp.id" class="flex-1 min-w-0 cursor-pointer">
+                    <label :for="'edit-attendee-' + emp.id" class="flex-1 min-w-0 cursor-pointer" @click.stop>
                       <span class="table-cell-primary">{{ emp.name }}</span>
                       <span class="table-cell-mono ml-2">{{ emp.id }}</span>
                     </label>

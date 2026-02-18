@@ -259,8 +259,8 @@ function handleSubmit() {
                                     >
                                         <Checkbox 
                                             :id="'attendee-' + emp.id"
-                                            :checked="isAttendeeSelected(emp.id)"
-                                            @update:checked="() => toggleAttendee(emp.id)" 
+                                            :model-value="form.attendees.includes(emp.id)"
+                                            @update:model-value="toggleAttendee(emp.id)" 
                                         />
                                         <label :for="'attendee-' + emp.id" class="flex-1 min-w-0 cursor-pointer">
                                             <span class="table-cell-primary">{{ emp.name }}</span>
