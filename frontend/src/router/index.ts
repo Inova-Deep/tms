@@ -21,6 +21,7 @@ const router = createRouter({
     { path: '/certifications', component: CertificationsView },
     { path: '/courses', component: CoursesView },
     { path: '/my-training', component: MyTrainingView },
+    { path: '/help', name: 'Help', component: () => import('@/views/HelpView.vue') },
     { path: '/:pathMatch(.*)*', component: NotFoundView },
   ],
 })

@@ -40,8 +40,8 @@ const route = useRoute()
 const router = useRouter()
 const id = computed(() => route.params.id as string)
 
-const detailQuery = useEmployeeDetail(id.value)
-const recordsQuery = useEmployeeRecords(id.value)
+const detailQuery = useEmployeeDetail(id)
+const recordsQuery = useEmployeeRecords(id)
 const detail = computed(() => detailQuery.data.value)
 const records = computed(() => recordsQuery.data.value ?? [])
 

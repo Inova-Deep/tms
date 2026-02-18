@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
-import { LayoutDashboard, Users, BookOpen, BadgeCheck, CalendarRange, FileBadge2, Menu, User, ChevronUp, RefreshCw, LogOut, Loader2 } from 'lucide-vue-next'
+import { LayoutDashboard, Users, BookOpen, BadgeCheck, CalendarRange, FileBadge2, Menu, User, ChevronUp, RefreshCw, LogOut, Loader2, HelpCircle } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -43,6 +43,7 @@ const items: NavItem[] = [
   { label: 'Sessions', to: '/sessions', icon: CalendarRange },
   { label: 'Certifications', to: '/certifications', icon: FileBadge2 },
   { label: 'My Training', to: '/my-training', icon: User },
+  { label: 'Help', to: '/help', icon: HelpCircle },
 ]
 
 const sidebarWidth = computed(() => (isCollapsed.value ? 'sidebar-collapsed' : 'sidebar-expanded'))

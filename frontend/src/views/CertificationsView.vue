@@ -14,6 +14,29 @@ import { FileBadge2 } from 'lucide-vue-next'
       </div>
     </div>
 
+    <Card class="card-surface">
+      <CardContent class="p-4">
+        <div class="space-y-3">
+          <div>
+            <h3 class="form-label mb-1">What is this feature?</h3>
+            <p class="page-description">Record and track external certifications obtained outside your company.</p>
+          </div>
+          <div>
+            <h3 class="form-label mb-1">What problem does it solve?</h3>
+            <p class="page-description">Keep track of professional qualifications, licenses, and certifications with expiry dates.</p>
+          </div>
+          <div>
+            <h3 class="form-label mb-2">How it works</h3>
+            <ol class="page-description space-y-1 list-decimal list-inside">
+              <li>Add a certification record when an employee obtains one</li>
+              <li>Enter the issuer, issue date, and expiry date</li>
+              <li>TMS tracks when it expires and alerts you</li>
+            </ol>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+
     <Card>
       <CardHeader>
         <CardTitle class="form-label">Certification Management</CardTitle>

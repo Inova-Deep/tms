@@ -988,7 +988,7 @@
 }
 
 .tabs-list-full {
-  @apply w-full;
+  @apply flex w-full justify-start;
 }
 
 .badge-text-sm {
@@ -1108,10 +1108,6 @@
 
 .tab-content {
   @apply mt-4;
-}
-
-.tabs-list-full {
-  @apply w-full justify-start;
 }
 
 /* ============================================
