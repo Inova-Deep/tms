@@ -36,6 +36,7 @@ lerna-debug.log*
 # Go (Backend)
 # Binaries for programs and plugins
 backend/server
+backend/tms
 *.exe
 *.exe~
 *.dll
@@ -51,11 +52,8 @@ backend/server
 # Go workspace file
 go.work
 
-# Validated database file (local only)
-backend/tms.db
-*.db
-*.sqlite
-data/
+# Claude Code
+.claude/
 
 # Frontend Build Output & Cache
 frontend/dist/
