@@ -55,6 +55,11 @@ go.work
 # Claude Code
 .claude/
 
+# Database files (local only, never commit)
+*.db
+*.sqlite
+data/
+
 # Frontend Build Output & Cache
 frontend/dist/
 dist/
