@@ -8,16 +8,11 @@ import (
 	"path/filepath"
 	"sort"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
-func Init(dbPath string) (*sql.DB, error) {
-	dir := filepath.Dir(dbPath)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return nil, fmt.Errorf("failed to create db directory: %w", err)
-	}
-
-	db, err := sql.Open("sqlite3", dbPath)
+func Init(databaseURL string) (*sql.DB, error) {
+	db, err := sql.Open("pgx", databaseURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
@@ -26,7 +21,7 @@ func Init(dbPath string) (*sql.DB, error) {
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
-	log.Printf("Connected to database at %s", dbPath)
+	log.Printf("Connected to database")
 
 	if err := runMigrations(db); err != nil {
 		return nil, fmt.Errorf("failed to run migrations: %w", err)
@@ -57,7 +52,7 @@ func runMigrations(db *sql.DB) error {
 
 		var exists bool
 		err := db.QueryRow(
-			"SELECT 1 FROM schema_migrations WHERE version = ?",
+			"SELECT 1 FROM schema_migrations WHERE version = $1",
 			version,
 		).Scan(&exists)
 		if err == nil {
@@ -78,7 +73,7 @@ func runMigrations(db *sql.DB) error {
 		}
 
 		if _, err := db.Exec(
-			"INSERT OR IGNORE INTO schema_migrations (version) VALUES (?)",
+			"INSERT INTO schema_migrations (version) VALUES ($1) ON CONFLICT DO NOTHING",
 			version,
 		); err != nil {
 			return fmt.Errorf("failed to record migration %s: %w", file, err)

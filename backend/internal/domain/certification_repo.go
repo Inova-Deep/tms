@@ -37,7 +37,7 @@ func (r *CertificationRepository) GetAll() ([]Certification, error) {
 }
 
 func (r *CertificationRepository) GetByEmployee(employeeID string) ([]Certification, error) {
-	rows, err := r.DB.Query("SELECT id, employee_id, course_id, issuer, issue_date, expiry_date, notes FROM certifications WHERE employee_id = ? ORDER BY issue_date DESC", employeeID)
+	rows, err := r.DB.Query("SELECT id, employee_id, course_id, issuer, issue_date, expiry_date, notes FROM certifications WHERE employee_id = $1 ORDER BY issue_date DESC", employeeID)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func (r *CertificationRepository) Create(req CreateCertificationRequest) (*Certi
 
 	_, err := r.DB.Exec(`
 		INSERT INTO certifications (id, employee_id, course_id, issuer, issue_date, expiry_date, notes)
-		VALUES (?, ?, ?, ?, ?, ?, ?)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 	`, id, req.EmployeeID, req.CourseID, req.Issuer, req.IssueDate, expiry, notes)
 	if err != nil {
 		return nil, err
@@ -85,7 +85,7 @@ func (r *CertificationRepository) Create(req CreateCertificationRequest) (*Certi
 	evidenceID := fmt.Sprintf("EV-%d", time.Now().UnixNano())
 	r.DB.Exec(`
 		INSERT INTO evidence (id, employee_id, course_id, evidence_type, completion_date, expiry_date, metadata)
-		VALUES (?, ?, ?, 'certification', ?, ?, ?)
+		VALUES ($1, $2, $3, 'certification', $4, $5, $6)
 	`, evidenceID, req.EmployeeID, req.CourseID, req.IssueDate, expiry, fmt.Sprintf(`{"issuer":"%s"}`, req.Issuer))
 
 	var expiryStr, notesStr string

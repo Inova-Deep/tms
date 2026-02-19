@@ -1,25 +1,9 @@
--- Add time and duration to training_events (idempotent)
--- SQLite doesn't support IF NOT EXISTS for ADD COLUMN, so we check pragmas
+-- Add time and duration to training_events
+ALTER TABLE training_events ADD COLUMN IF NOT EXISTS time TEXT DEFAULT '';
+ALTER TABLE training_events ADD COLUMN IF NOT EXISTS duration INTEGER DEFAULT 0;
 
--- Add time column if not exists
-INSERT INTO training_events (id, course_name, date) 
-SELECT '___temp_check___', 'temp', '2000-01-01' 
-WHERE NOT EXISTS (
-    SELECT 1 FROM pragma_table_info('training_events') WHERE name='time'
-);
-DELETE FROM training_events WHERE id = '___temp_check___';
-ALTER TABLE training_events ADD COLUMN time TEXT DEFAULT '';
-
--- Add duration column if not exists  
-INSERT INTO training_events (id, course_name, date) 
-SELECT '___temp_check___', 'temp', '2000-01-01' 
-WHERE NOT EXISTS (
-    SELECT 1 FROM pragma_table_info('training_events') WHERE name='duration'
-);
-DELETE FROM training_events WHERE id = '___temp_check___';
-ALTER TABLE training_events ADD COLUMN duration INTEGER DEFAULT 0;
-
--- Recreate profile_exclusions with an ID primary key for individual CRUD
+-- Recreate profile_exclusions with an ID primary key for individual CRUD.
+-- PostgreSQL approach: create new table, migrate data, drop old, rename.
 CREATE TABLE IF NOT EXISTS profile_exclusions_new (
     id TEXT PRIMARY KEY,
     employee_id TEXT NOT NULL,
@@ -32,7 +16,7 @@ CREATE TABLE IF NOT EXISTS profile_exclusions_new (
     FOREIGN KEY (profile_id) REFERENCES profiles (id)
 );
 
-INSERT OR IGNORE INTO profile_exclusions_new (
+INSERT INTO profile_exclusions_new (
     id,
     employee_id,
     profile_id,
@@ -47,7 +31,8 @@ SELECT
     reason,
     expiry_date,
     created_at
-FROM profile_exclusions;
+FROM profile_exclusions
+ON CONFLICT DO NOTHING;
 
 DROP TABLE IF EXISTS profile_exclusions;
 

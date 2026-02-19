@@ -1,9 +1,9 @@
--- Wave 1: Backfill courses table and update FK references
--- Idempotent: all operations have WHERE clauses to prevent duplicates
+-- Backfill courses table and update FK references
+-- Idempotent: all operations have ON CONFLICT / WHERE IS NULL guards
 
-INSERT OR IGNORE INTO courses (id, name, type, validity_months)
+INSERT INTO courses (id, name, type, validity_months)
 SELECT
-    'C' || printf('%03d', row_number) AS id,
+    'C' || LPAD(row_number::text, 3, '0') AS id,
     name,
     CASE
         WHEN LOWER(name) LIKE '%licence%' OR LOWER(name) LIKE '%certification%'
@@ -17,8 +17,9 @@ FROM (
         validity_months,
         ROW_NUMBER() OVER (ORDER BY name) AS row_number
     FROM requirements
-    GROUP BY name
-);
+    GROUP BY name, validity_months
+) sub
+ON CONFLICT DO NOTHING;
 
 UPDATE requirements
 SET course_id = (

@@ -24,13 +24,13 @@ import (
 func main() {
 	cfg := config.Load()
 
-	database, err := db.Init(cfg.DBPath)
+	database, err := db.Init(cfg.DatabaseURL)
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 	defer database.Close()
 
-	log.Printf("Connected to database at %s", cfg.DBPath)
+	log.Printf("Connected to database at %s", cfg.DatabaseURL)
 
 	if err := seeds.Run(database); err != nil {
 		log.Printf("Warning: Failed to seed database: %v", err)
@@ -45,6 +45,16 @@ func main() {
 	courseRepo := &domain.CourseRepository{DB: database}
 	matrixRepo := domain.NewMatrixRepository(database, employeeRepo, courseRepo, evidenceRepo, profileRepo)
 
+	// DML repositories
+	roleRepo := &domain.RoleRepository{DB: database}
+	applicabilityRepo := &domain.ApplicabilityRepository{DB: database}
+	inductionRepo := &domain.InductionRepository{DB: database}
+	workAuthorizationRepo := &domain.WorkAuthorizationRepository{DB: database}
+	competenceAssessmentRepo := &domain.CompetenceAssessmentRepository{DB: database}
+	supervisionRepo := &domain.SupervisionRepository{DB: database}
+	reassessmentRepo := &domain.ReassessmentRepository{DB: database}
+	effectivenessRepo := &domain.TrainingEffectivenessRepository{DB: database}
+
 	// Initialize services
 	computationService := &logic.ComputationService{}
 	dashboardService := &logic.DashboardService{
@@ -56,15 +66,23 @@ func main() {
 
 	// Create HTTP server
 	srv := &httpHandler.Server{
-		EmployeeRepo:       employeeRepo,
-		ProfileRepo:        profileRepo,
-		EvidenceRepo:       evidenceRepo,
-		EventRepo:          eventRepo,
-		CertificationRepo:  certificationRepo,
-		CourseRepo:         courseRepo,
-		ComputationService: computationService,
-		DashboardService:   dashboardService,
-		MatrixRepo:         matrixRepo,
+		EmployeeRepo:             employeeRepo,
+		ProfileRepo:              profileRepo,
+		EvidenceRepo:             evidenceRepo,
+		EventRepo:                eventRepo,
+		CertificationRepo:        certificationRepo,
+		CourseRepo:               courseRepo,
+		ComputationService:       computationService,
+		DashboardService:         dashboardService,
+		MatrixRepo:               matrixRepo,
+		RoleRepo:                 roleRepo,
+		ApplicabilityRepo:        applicabilityRepo,
+		InductionRepo:            inductionRepo,
+		WorkAuthorizationRepo:    workAuthorizationRepo,
+		CompetenceAssessmentRepo: competenceAssessmentRepo,
+		SupervisionRepo:          supervisionRepo,
+		ReassessmentRepo:         reassessmentRepo,
+		EffectivenessRepo:        effectivenessRepo,
 	}
 
 	// Setup router

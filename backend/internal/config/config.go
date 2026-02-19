@@ -6,14 +6,14 @@ import (
 )
 
 type Config struct {
-	Port   string
-	DBPath string
+	Port        string
+	DatabaseURL string
 }
 
 func Load() *Config {
 	return &Config{
-		Port:   getEnv("PORT", "8080"),
-		DBPath: getEnv("DB_PATH", "./tms.db"),
+		Port:        getEnv("PORT", "8080"),
+		DatabaseURL: getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/tms?sslmode=disable"),
 	}
 }
 

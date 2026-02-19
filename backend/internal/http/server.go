@@ -11,15 +11,23 @@ import (
 )
 
 type Server struct {
-	EmployeeRepo       *domain.EmployeeRepository
-	ProfileRepo        *domain.ProfileRepository
-	EvidenceRepo       *domain.EvidenceRepository
-	EventRepo          *domain.EventRepository
-	CertificationRepo  *domain.CertificationRepository
-	CourseRepo         *domain.CourseRepository
-	ComputationService *logic.ComputationService
-	DashboardService   *logic.DashboardService
-	MatrixRepo         *domain.MatrixRepository
+	EmployeeRepo            *domain.EmployeeRepository
+	ProfileRepo             *domain.ProfileRepository
+	EvidenceRepo            *domain.EvidenceRepository
+	EventRepo               *domain.EventRepository
+	CertificationRepo       *domain.CertificationRepository
+	CourseRepo              *domain.CourseRepository
+	ComputationService      *logic.ComputationService
+	DashboardService        *logic.DashboardService
+	MatrixRepo              *domain.MatrixRepository
+	RoleRepo                *domain.RoleRepository
+	ApplicabilityRepo       *domain.ApplicabilityRepository
+	InductionRepo           *domain.InductionRepository
+	WorkAuthorizationRepo   *domain.WorkAuthorizationRepository
+	CompetenceAssessmentRepo *domain.CompetenceAssessmentRepository
+	SupervisionRepo         *domain.SupervisionRepository
+	ReassessmentRepo        *domain.ReassessmentRepository
+	EffectivenessRepo       *domain.TrainingEffectivenessRepository
 }
 
 // Routes returns the API router
@@ -39,6 +47,11 @@ func (s *Server) Routes() chi.Router {
 			r.Get("/search", s.SearchEmployees)
 			r.Get("/{id}", s.GetEmployee)
 			r.Get("/{id}/records", s.GetEmployeeRecords)
+			// DML sub-routes
+			r.Get("/{id}/induction-record", s.GetEmployeeInduction)
+			r.Get("/{id}/work-authorizations", s.GetEmployeeAuthorizations)
+			r.Get("/{id}/competence-assessments", s.GetEmployeeAssessments)
+			r.Get("/{id}/competence-status/{reqId}", s.GetEmployeeCompetenceStatus)
 		})
 
 		// Profile routes
@@ -95,6 +108,68 @@ func (s *Server) Routes() chi.Router {
 		})
 
 		r.Get("/matrix", s.handleGetMatrix)
+
+		// ── DML: Roles ──────────────────────────────────────────────
+		r.Route("/roles", func(r chi.Router) {
+			r.Get("/", s.GetRoles)
+			r.Post("/", RequireAdmin(http.HandlerFunc(s.CreateRole)).ServeHTTP)
+			r.Get("/matrix-included", s.GetMatrixRoles)
+			r.Get("/awareness-only", s.GetAwarenessRoles)
+			r.Get("/{id}", s.GetRole)
+			r.Put("/{id}", RequireAdmin(http.HandlerFunc(s.UpdateRole)).ServeHTTP)
+			r.Get("/{id}/applicability-decision", s.GetApplicabilityDecision)
+			r.Post("/{id}/applicability-decision", RequireAdmin(http.HandlerFunc(s.CreateApplicabilityDecision)).ServeHTTP)
+		})
+
+		// ── DML: Escalations ────────────────────────────────────────
+		r.Post("/escalations/{id}/resolve", RequireAdmin(http.HandlerFunc(s.ResolveEscalation)).ServeHTTP)
+
+		// ── DML: Inductions ─────────────────────────────────────────
+		r.Route("/induction-records", func(r chi.Router) {
+			r.Get("/", s.GetPendingInductions)
+			r.Post("/", RequireAdmin(http.HandlerFunc(s.CreateInductionRecord)).ServeHTTP)
+		})
+
+		// ── DML: Work Authorizations ────────────────────────────────
+		r.Route("/work-authorizations", func(r chi.Router) {
+			r.Post("/", RequireAdmin(http.HandlerFunc(s.CreateWorkAuthorization)).ServeHTTP)
+			r.Get("/expiring", s.GetExpiringAuthorizations)
+			r.Get("/legacy-pending", s.GetLegacyPendingAuthorizations)
+			r.Put("/{id}/revoke", RequireAdmin(http.HandlerFunc(s.RevokeWorkAuthorization)).ServeHTTP)
+		})
+
+		// ── DML: Competence Assessments ─────────────────────────────
+		r.Route("/competence-assessments", func(r chi.Router) {
+			r.Post("/", RequireAdmin(http.HandlerFunc(s.CreateCompetenceAssessment)).ServeHTTP)
+			r.Get("/pending", s.GetPendingAssessments)
+		})
+
+		// ── DML: Supervision ────────────────────────────────────────
+		r.Route("/supervision-periods", func(r chi.Router) {
+			r.Post("/", RequireAdmin(http.HandlerFunc(s.CreateSupervisionPeriod)).ServeHTTP)
+			r.Put("/{id}/complete", RequireAdmin(http.HandlerFunc(s.CompleteSupervision)).ServeHTTP)
+		})
+		r.Get("/supervision/active", s.GetActiveSupervision)
+		r.Get("/supervision/ready-for-assessment", s.GetReadyForAssessment)
+
+		// ── DML: Reassessment Triggers ──────────────────────────────
+		r.Route("/reassessment-triggers", func(r chi.Router) {
+			r.Post("/", RequireAdmin(http.HandlerFunc(s.CreateReassessmentTrigger)).ServeHTTP)
+			r.Get("/open", s.GetOpenReassessments)
+			r.Put("/{id}/resolve", RequireAdmin(http.HandlerFunc(s.ResolveReassessmentTrigger)).ServeHTTP)
+		})
+
+		// ── DML: Training Effectiveness ─────────────────────────────
+		r.Post("/training-effectiveness-evaluations", RequireAdmin(http.HandlerFunc(s.CreateEffectivenessEvaluation)).ServeHTTP)
+
+		// ── DML: Dashboard KPIs ──────────────────────────────────────
+		r.Get("/dashboard/competence-health", s.GetCompetenceHealth)
+		r.Get("/dashboard/supervision-queue", s.GetSupervisionQueue)
+		r.Get("/dashboard/reassessment-alerts", s.GetReassessmentAlerts)
+
+		// ── DML: Reports ─────────────────────────────────────────────
+		r.Get("/reports/dml-qa-reg-5024", s.GetDMLQAReport)
+		r.Get("/reports/competence-degradation-risk", s.GetCompetenceDegradationRisk)
 	})
 
 	return r
@@ -963,6 +1038,597 @@ func (s *Server) handleGetMatrix(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	respondWithJSON(w, matrix)
+}
+
+// ==================== DML: Role Handlers ====================
+
+func (s *Server) GetRoles(w http.ResponseWriter, r *http.Request) {
+	roles, err := s.RoleRepo.GetAll()
+	if err != nil {
+		respondWithError(w, "Failed to get roles", http.StatusInternalServerError)
+		return
+	}
+	respondWithJSON(w, roles)
+}
+
+func (s *Server) GetRole(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	role, err := s.RoleRepo.GetByID(id)
+	if err != nil {
+		respondWithError(w, "Failed to get role", http.StatusInternalServerError)
+		return
+	}
+	if role == nil {
+		respondWithError(w, "Role not found", http.StatusNotFound)
+		return
+	}
+	respondWithJSON(w, role)
+}
+
+func (s *Server) CreateRole(w http.ResponseWriter, r *http.Request) {
+	var req domain.CreateRoleRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondWithError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	if req.Name == "" {
+		respondWithError(w, "name is required", http.StatusBadRequest)
+		return
+	}
+	role, err := s.RoleRepo.Create(req)
+	if err != nil {
+		respondWithError(w, "Failed to create role", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	respondWithJSON(w, role)
+}
+
+func (s *Server) UpdateRole(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	var req domain.UpdateRoleRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondWithError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	role, err := s.RoleRepo.Update(id, req)
+	if err != nil {
+		respondWithError(w, "Failed to update role", http.StatusInternalServerError)
+		return
+	}
+	if role == nil {
+		respondWithError(w, "Role not found", http.StatusNotFound)
+		return
+	}
+	respondWithJSON(w, role)
+}
+
+func (s *Server) GetMatrixRoles(w http.ResponseWriter, r *http.Request) {
+	roles, err := s.RoleRepo.GetMatrixRoles()
+	if err != nil {
+		respondWithError(w, "Failed to get matrix roles", http.StatusInternalServerError)
+		return
+	}
+	respondWithJSON(w, roles)
+}
+
+func (s *Server) GetAwarenessRoles(w http.ResponseWriter, r *http.Request) {
+	roles, err := s.RoleRepo.GetAwarenessRoles()
+	if err != nil {
+		respondWithError(w, "Failed to get awareness roles", http.StatusInternalServerError)
+		return
+	}
+	respondWithJSON(w, roles)
+}
+
+// ==================== DML: Applicability Decision Handlers ====================
+
+func (s *Server) GetApplicabilityDecision(w http.ResponseWriter, r *http.Request) {
+	roleID := chi.URLParam(r, "id")
+	decision, err := s.ApplicabilityRepo.GetByRoleID(roleID)
+	if err != nil {
+		respondWithError(w, "Failed to get applicability decision", http.StatusInternalServerError)
+		return
+	}
+	if decision == nil {
+		respondWithError(w, "No applicability decision found for this role", http.StatusNotFound)
+		return
+	}
+	respondWithJSON(w, decision)
+}
+
+func (s *Server) CreateApplicabilityDecision(w http.ResponseWriter, r *http.Request) {
+	roleID := chi.URLParam(r, "id")
+	var req domain.CreateApplicabilityDecisionRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondWithError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	if req.DecidedBy == "" {
+		respondWithError(w, "decidedBy is required", http.StatusBadRequest)
+		return
+	}
+	decision, err := s.ApplicabilityRepo.Create(roleID, req)
+	if err != nil {
+		respondWithError(w, "Failed to create applicability decision", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	respondWithJSON(w, decision)
+}
+
+func (s *Server) ResolveEscalation(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	var req domain.ResolveEscalationRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondWithError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	if req.ResolvedBy == "" {
+		respondWithError(w, "resolvedBy is required", http.StatusBadRequest)
+		return
+	}
+	decision, err := s.ApplicabilityRepo.ResolveEscalation(id, req)
+	if err != nil {
+		respondWithError(w, "Failed to resolve escalation", http.StatusInternalServerError)
+		return
+	}
+	if decision == nil {
+		respondWithError(w, "Escalation not found", http.StatusNotFound)
+		return
+	}
+	respondWithJSON(w, decision)
+}
+
+// ==================== DML: Induction Handlers ====================
+
+func (s *Server) GetPendingInductions(w http.ResponseWriter, r *http.Request) {
+	records, err := s.InductionRepo.GetPending()
+	if err != nil {
+		respondWithError(w, "Failed to get pending inductions", http.StatusInternalServerError)
+		return
+	}
+	respondWithJSON(w, records)
+}
+
+func (s *Server) CreateInductionRecord(w http.ResponseWriter, r *http.Request) {
+	var req domain.CreateInductionRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondWithError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	if req.EmployeeID == "" || req.ConductedBy == "" || req.InductionDate == "" {
+		respondWithError(w, "employeeId, conductedBy, and inductionDate are required", http.StatusBadRequest)
+		return
+	}
+	record, err := s.InductionRepo.Create(req)
+	if err != nil {
+		respondWithError(w, "Failed to create induction record", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	respondWithJSON(w, record)
+}
+
+func (s *Server) GetEmployeeInduction(w http.ResponseWriter, r *http.Request) {
+	employeeID := chi.URLParam(r, "id")
+	user := GetUserFromContext(r)
+	if !user.CanAccessEmployee(employeeID) {
+		respondWithError(w, "Access denied", http.StatusForbidden)
+		return
+	}
+	records, err := s.InductionRepo.GetByEmployee(employeeID)
+	if err != nil {
+		respondWithError(w, "Failed to get induction records", http.StatusInternalServerError)
+		return
+	}
+	respondWithJSON(w, records)
+}
+
+// ==================== DML: Work Authorization Handlers ====================
+
+func (s *Server) CreateWorkAuthorization(w http.ResponseWriter, r *http.Request) {
+	var req domain.CreateWorkAuthorizationRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondWithError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	if req.EmployeeID == "" || req.AuthorizationType == "" || req.AuthorizedBy == "" {
+		respondWithError(w, "employeeId, authorizationType, and authorizedBy are required", http.StatusBadRequest)
+		return
+	}
+	auth, err := s.WorkAuthorizationRepo.Create(req)
+	if err != nil {
+		respondWithError(w, "Failed to create work authorization", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	respondWithJSON(w, auth)
+}
+
+func (s *Server) GetExpiringAuthorizations(w http.ResponseWriter, r *http.Request) {
+	daysAhead := 30
+	auths, err := s.WorkAuthorizationRepo.GetExpiring(daysAhead)
+	if err != nil {
+		respondWithError(w, "Failed to get expiring authorizations", http.StatusInternalServerError)
+		return
+	}
+	respondWithJSON(w, auths)
+}
+
+func (s *Server) GetLegacyPendingAuthorizations(w http.ResponseWriter, r *http.Request) {
+	auths, err := s.WorkAuthorizationRepo.GetLegacyPending()
+	if err != nil {
+		respondWithError(w, "Failed to get legacy pending authorizations", http.StatusInternalServerError)
+		return
+	}
+	respondWithJSON(w, auths)
+}
+
+func (s *Server) RevokeWorkAuthorization(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	var req domain.RevokeAuthorizationRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondWithError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	if req.RevokeReason == "" {
+		respondWithError(w, "revokeReason is required", http.StatusBadRequest)
+		return
+	}
+	if err := s.WorkAuthorizationRepo.Revoke(id, req); err != nil {
+		respondWithError(w, "Failed to revoke authorization", http.StatusInternalServerError)
+		return
+	}
+	respondWithJSON(w, map[string]string{"status": "ok"})
+}
+
+func (s *Server) GetEmployeeAuthorizations(w http.ResponseWriter, r *http.Request) {
+	employeeID := chi.URLParam(r, "id")
+	user := GetUserFromContext(r)
+	if !user.CanAccessEmployee(employeeID) {
+		respondWithError(w, "Access denied", http.StatusForbidden)
+		return
+	}
+	auths, err := s.WorkAuthorizationRepo.GetByEmployee(employeeID)
+	if err != nil {
+		respondWithError(w, "Failed to get work authorizations", http.StatusInternalServerError)
+		return
+	}
+	respondWithJSON(w, auths)
+}
+
+func (s *Server) GetEmployeeCompetenceStatus(w http.ResponseWriter, r *http.Request) {
+	employeeID := chi.URLParam(r, "id")
+	reqID := chi.URLParam(r, "reqId")
+	user := GetUserFromContext(r)
+	if !user.CanAccessEmployee(employeeID) {
+		respondWithError(w, "Access denied", http.StatusForbidden)
+		return
+	}
+	auth, err := s.WorkAuthorizationRepo.GetByEmployeeAndRequirement(employeeID, reqID)
+	if err != nil {
+		respondWithError(w, "Failed to get competence status", http.StatusInternalServerError)
+		return
+	}
+	if auth == nil {
+		respondWithJSON(w, map[string]string{"status": "REQUIRED"})
+		return
+	}
+	respondWithJSON(w, auth)
+}
+
+// ==================== DML: Competence Assessment Handlers ====================
+
+func (s *Server) CreateCompetenceAssessment(w http.ResponseWriter, r *http.Request) {
+	var req domain.CreateCompetenceAssessmentRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondWithError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	if req.EmployeeID == "" || req.AssessedBy == "" || req.AssessmentDate == "" || req.WorkActivitiesCovered == "" || req.Outcome == "" {
+		respondWithError(w, "employeeId, assessedBy, assessmentDate, workActivitiesCovered, and outcome are required", http.StatusBadRequest)
+		return
+	}
+	assessment, err := s.CompetenceAssessmentRepo.Create(req)
+	if err != nil {
+		respondWithError(w, "Failed to create competence assessment", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	respondWithJSON(w, assessment)
+}
+
+func (s *Server) GetPendingAssessments(w http.ResponseWriter, r *http.Request) {
+	assessments, err := s.CompetenceAssessmentRepo.GetPending()
+	if err != nil {
+		respondWithError(w, "Failed to get pending assessments", http.StatusInternalServerError)
+		return
+	}
+	respondWithJSON(w, assessments)
+}
+
+func (s *Server) GetEmployeeAssessments(w http.ResponseWriter, r *http.Request) {
+	employeeID := chi.URLParam(r, "id")
+	user := GetUserFromContext(r)
+	if !user.CanAccessEmployee(employeeID) {
+		respondWithError(w, "Access denied", http.StatusForbidden)
+		return
+	}
+	assessments, err := s.CompetenceAssessmentRepo.GetByEmployee(employeeID)
+	if err != nil {
+		respondWithError(w, "Failed to get assessments", http.StatusInternalServerError)
+		return
+	}
+	respondWithJSON(w, assessments)
+}
+
+// ==================== DML: Supervision Handlers ====================
+
+func (s *Server) CreateSupervisionPeriod(w http.ResponseWriter, r *http.Request) {
+	var req domain.CreateSupervisionPeriodRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondWithError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	if req.EmployeeID == "" || req.SupervisorID == "" || req.StartDate == "" {
+		respondWithError(w, "employeeId, supervisorId, and startDate are required", http.StatusBadRequest)
+		return
+	}
+	period, err := s.SupervisionRepo.Create(req)
+	if err != nil {
+		respondWithError(w, "Failed to create supervision period", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	respondWithJSON(w, period)
+}
+
+func (s *Server) CompleteSupervision(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	var req domain.CompleteSupervisionRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondWithError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	if req.EndDate == "" {
+		respondWithError(w, "endDate is required", http.StatusBadRequest)
+		return
+	}
+	period, err := s.SupervisionRepo.Complete(id, req)
+	if err != nil {
+		respondWithError(w, "Failed to complete supervision period", http.StatusInternalServerError)
+		return
+	}
+	if period == nil {
+		respondWithError(w, "Supervision period not found", http.StatusNotFound)
+		return
+	}
+	respondWithJSON(w, period)
+}
+
+func (s *Server) GetActiveSupervision(w http.ResponseWriter, r *http.Request) {
+	periods, err := s.SupervisionRepo.GetActive()
+	if err != nil {
+		respondWithError(w, "Failed to get active supervision periods", http.StatusInternalServerError)
+		return
+	}
+	respondWithJSON(w, periods)
+}
+
+func (s *Server) GetReadyForAssessment(w http.ResponseWriter, r *http.Request) {
+	periods, err := s.SupervisionRepo.GetReadyForAssessment()
+	if err != nil {
+		respondWithError(w, "Failed to get supervision periods ready for assessment", http.StatusInternalServerError)
+		return
+	}
+	respondWithJSON(w, periods)
+}
+
+// ==================== DML: Reassessment Trigger Handlers ====================
+
+func (s *Server) CreateReassessmentTrigger(w http.ResponseWriter, r *http.Request) {
+	var req domain.CreateReassessmentTriggerRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondWithError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	if req.EmployeeID == "" || req.TriggerType == "" || req.TriggeredBy == "" {
+		respondWithError(w, "employeeId, triggerType, and triggeredBy are required", http.StatusBadRequest)
+		return
+	}
+	trigger, err := s.ReassessmentRepo.Create(req)
+	if err != nil {
+		respondWithError(w, "Failed to create reassessment trigger", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	respondWithJSON(w, trigger)
+}
+
+func (s *Server) GetOpenReassessments(w http.ResponseWriter, r *http.Request) {
+	triggers, err := s.ReassessmentRepo.GetOpen()
+	if err != nil {
+		respondWithError(w, "Failed to get open reassessments", http.StatusInternalServerError)
+		return
+	}
+	respondWithJSON(w, triggers)
+}
+
+func (s *Server) ResolveReassessmentTrigger(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	var req domain.ResolveReassessmentRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondWithError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	if req.ResolutionNotes == "" {
+		respondWithError(w, "resolutionNotes is required", http.StatusBadRequest)
+		return
+	}
+	trigger, err := s.ReassessmentRepo.Resolve(id, req)
+	if err != nil {
+		respondWithError(w, "Failed to resolve reassessment trigger", http.StatusInternalServerError)
+		return
+	}
+	if trigger == nil {
+		respondWithError(w, "Reassessment trigger not found", http.StatusNotFound)
+		return
+	}
+	respondWithJSON(w, trigger)
+}
+
+// ==================== DML: Training Effectiveness Handlers ====================
+
+func (s *Server) CreateEffectivenessEvaluation(w http.ResponseWriter, r *http.Request) {
+	var req domain.CreateEffectivenessEvaluationRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondWithError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	if req.EvaluatedBy == "" || req.EvaluationDate == "" || req.Method == "" || req.Outcome == "" {
+		respondWithError(w, "evaluatedBy, evaluationDate, method, and outcome are required", http.StatusBadRequest)
+		return
+	}
+	eval, err := s.EffectivenessRepo.Create(req)
+	if err != nil {
+		respondWithError(w, "Failed to create effectiveness evaluation", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	respondWithJSON(w, eval)
+}
+
+// ==================== DML: Competence Dashboard Handlers ====================
+
+func (s *Server) GetCompetenceHealth(w http.ResponseWriter, r *http.Request) {
+	matrixRoles, err := s.RoleRepo.GetMatrixRoles()
+	if err != nil {
+		respondWithError(w, "Failed to get roles", http.StatusInternalServerError)
+		return
+	}
+
+	legacyPending, err := s.WorkAuthorizationRepo.GetLegacyPending()
+	if err != nil {
+		respondWithError(w, "Failed to get legacy pending", http.StatusInternalServerError)
+		return
+	}
+
+	activeSupervision, err := s.SupervisionRepo.GetActive()
+	if err != nil {
+		respondWithError(w, "Failed to get supervision", http.StatusInternalServerError)
+		return
+	}
+
+	openReassessments, err := s.ReassessmentRepo.GetOpen()
+	if err != nil {
+		respondWithError(w, "Failed to get reassessments", http.StatusInternalServerError)
+		return
+	}
+
+	authorized := 0
+	pendingAuth := 0
+	for _, role := range matrixRoles {
+		auths, _ := s.WorkAuthorizationRepo.GetByEmployee(role.ID)
+		for _, a := range auths {
+			switch a.AuthorizationState {
+			case "AUTHORIZED":
+				authorized++
+			case "PENDING_AUTHORIZATION":
+				pendingAuth++
+			}
+		}
+	}
+
+	total := authorized + pendingAuth
+	healthPct := 0.0
+	if total > 0 {
+		healthPct = float64(authorized) / float64(total) * 100
+	}
+
+	resp := domain.CompetenceHealthResponse{
+		TotalMatrixRoles:          len(matrixRoles),
+		AuthorizedCount:           authorized,
+		PendingAuthorizationCount: pendingAuth,
+		LegacyPendingCount:        len(legacyPending),
+		ActiveSupervisionCount:    len(activeSupervision),
+		OpenReassessmentsCount:    len(openReassessments),
+		AuthorizationHealthPct:    healthPct,
+	}
+	respondWithJSON(w, resp)
+}
+
+func (s *Server) GetSupervisionQueue(w http.ResponseWriter, r *http.Request) {
+	active, err := s.SupervisionRepo.GetActive()
+	if err != nil {
+		respondWithError(w, "Failed to get active supervision", http.StatusInternalServerError)
+		return
+	}
+
+	ready, err := s.SupervisionRepo.GetReadyForAssessment()
+	if err != nil {
+		respondWithError(w, "Failed to get ready for assessment", http.StatusInternalServerError)
+		return
+	}
+
+	respondWithJSON(w, domain.SupervisionQueueResponse{
+		Active:             active,
+		ReadyForAssessment: ready,
+	})
+}
+
+func (s *Server) GetReassessmentAlerts(w http.ResponseWriter, r *http.Request) {
+	open, err := s.ReassessmentRepo.GetOpen()
+	if err != nil {
+		respondWithError(w, "Failed to get open reassessments", http.StatusInternalServerError)
+		return
+	}
+	respondWithJSON(w, domain.ReassessmentAlertsResponse{
+		Open:  open,
+		Total: len(open),
+	})
+}
+
+// ==================== DML: Report Handlers ====================
+
+func (s *Server) GetDMLQAReport(w http.ResponseWriter, r *http.Request) {
+	legacyPending, _ := s.WorkAuthorizationRepo.GetLegacyPending()
+	expiring, _ := s.WorkAuthorizationRepo.GetExpiring(30)
+	openReassessments, _ := s.ReassessmentRepo.GetOpen()
+	activeSupervision, _ := s.SupervisionRepo.GetActive()
+	pendingInductions, _ := s.InductionRepo.GetPending()
+
+	report := map[string]interface{}{
+		"reportTitle":           "DML Competence Assurance Summary (DML-QA-REG-5024)",
+		"generatedAt":           "now",
+		"legacyPendingCount":    len(legacyPending),
+		"expiringIn30DaysCount": len(expiring),
+		"openReassessmentsCount": len(openReassessments),
+		"activeSupervisionCount": len(activeSupervision),
+		"pendingInductionsCount": len(pendingInductions),
+		"legacyPending":          legacyPending,
+		"expiring":               expiring,
+		"openReassessments":      openReassessments,
+	}
+	respondWithJSON(w, report)
+}
+
+func (s *Server) GetCompetenceDegradationRisk(w http.ResponseWriter, r *http.Request) {
+	expiring, _ := s.WorkAuthorizationRepo.GetExpiring(30)
+	openReassessments, _ := s.ReassessmentRepo.GetOpen()
+	pendingAssessments, _ := s.CompetenceAssessmentRepo.GetPending()
+
+	report := map[string]interface{}{
+		"reportTitle":              "Competence Degradation Risk Assessment",
+		"generatedAt":              "now",
+		"expiringAuthorizationsCount": len(expiring),
+		"openReassessmentsCount":   len(openReassessments),
+		"pendingAssessmentsCount":  len(pendingAssessments),
+		"expiringAuthorizations":   expiring,
+		"openReassessments":        openReassessments,
+		"pendingAssessments":       pendingAssessments,
+	}
+	respondWithJSON(w, report)
 }
 
 // ==================== Helpers ====================

@@ -28,7 +28,7 @@ func (r *EvidenceRepository) GetByEmployee(employeeID string) ([]Evidence, error
 		       c.id, c.name, c.code, c.type, c.description, c.validity_months
 		FROM evidence e
 		LEFT JOIN courses c ON e.course_id = c.id
-		WHERE e.employee_id = ?
+		WHERE e.employee_id = $1
 	`
 	rows, err := r.DB.Query(query, employeeID)
 	if err != nil {
@@ -82,7 +82,7 @@ func (r *EvidenceRepository) Create(e Evidence) error {
 	}
 	_, err := r.DB.Exec(`
 		INSERT INTO evidence (id, employee_id, course_id, evidence_type, completion_date, expiry_date, metadata)
-		VALUES (?, ?, ?, ?, ?, ?, ?)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 	`, e.ID, e.EmployeeID, e.CourseID, e.EvidenceType, e.CompletionDate, expiry, e.Metadata)
 	return err
 }
@@ -98,7 +98,7 @@ func (r *EvidenceRepository) CreateFromAttendance(employeeID, courseID, completi
 
 	_, err := r.DB.Exec(`
 		INSERT INTO evidence (id, employee_id, course_id, evidence_type, completion_date, expiry_date, metadata)
-		VALUES (?, ?, ?, 'attendance', ?, ?, ?)
+		VALUES ($1, $2, $3, 'attendance', $4, $5, $6)
 	`, id, employeeID, courseID, completionDate, expiryDate, "")
 	return err
 }

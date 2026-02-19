@@ -32,7 +32,7 @@ func (r *EventRepository) GetAll() ([]TrainingEvent, error) {
 
 func (r *EventRepository) GetByID(id string) (*TrainingEvent, error) {
 	var e TrainingEvent
-	err := r.DB.QueryRow("SELECT id, course_id, date, COALESCE(time, ''), COALESCE(duration, 0), location, instructor_id, status FROM training_events WHERE id = ?", id).
+	err := r.DB.QueryRow("SELECT id, course_id, date, COALESCE(time, ''), COALESCE(duration, 0), location, instructor_id, status FROM training_events WHERE id = $1", id).
 		Scan(&e.ID, &e.CourseID, &e.Date, &e.Time, &e.Duration, &e.Location, &e.InstructorID, &e.Status)
 	if err == sql.ErrNoRows {
 		return nil, nil
@@ -46,7 +46,7 @@ func (r *EventRepository) GetByID(id string) (*TrainingEvent, error) {
 }
 
 func (r *EventRepository) getAttendees(eventID string) ([]string, error) {
-	rows, err := r.DB.Query("SELECT employee_id FROM event_attendance WHERE event_id = ?", eventID)
+	rows, err := r.DB.Query("SELECT employee_id FROM event_attendance WHERE event_id = $1", eventID)
 	if err != nil {
 		return nil, err
 	}
@@ -68,14 +68,14 @@ func (r *EventRepository) Create(req CreateEventRequest) (*TrainingEvent, error)
 
 	_, err := r.DB.Exec(`
 		INSERT INTO training_events (id, course_id, date, time, duration, location, instructor_id, status)
-		VALUES (?, ?, ?, ?, ?, ?, ?, 'scheduled')
+		VALUES ($1, $2, $3, $4, $5, $6, $7, 'scheduled')
 	`, id, req.CourseID, req.Date, req.Time, req.Duration, req.Location, req.InstructorID)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, attendeeID := range req.Attendees {
-		r.DB.Exec("INSERT INTO event_attendance (event_id, employee_id) VALUES (?, ?)", id, attendeeID)
+		r.DB.Exec("INSERT INTO event_attendance (event_id, employee_id) VALUES ($1, $2)", id, attendeeID)
 	}
 
 	return r.GetByID(id)
@@ -85,34 +85,42 @@ func (r *EventRepository) Update(id string, req UpdateEventRequest) (*TrainingEv
 	query := "UPDATE training_events SET "
 	args := make([]interface{}, 0)
 	setClauses := make([]string, 0)
+	paramIdx := 1
 
 	if req.CourseID != nil {
-		setClauses = append(setClauses, "course_id = ?")
+		setClauses = append(setClauses, fmt.Sprintf("course_id = $%d", paramIdx))
 		args = append(args, *req.CourseID)
+		paramIdx++
 	}
 	if req.Date != nil {
-		setClauses = append(setClauses, "date = ?")
+		setClauses = append(setClauses, fmt.Sprintf("date = $%d", paramIdx))
 		args = append(args, *req.Date)
+		paramIdx++
 	}
 	if req.Time != nil {
-		setClauses = append(setClauses, "time = ?")
+		setClauses = append(setClauses, fmt.Sprintf("time = $%d", paramIdx))
 		args = append(args, *req.Time)
+		paramIdx++
 	}
 	if req.Duration != nil {
-		setClauses = append(setClauses, "duration = ?")
+		setClauses = append(setClauses, fmt.Sprintf("duration = $%d", paramIdx))
 		args = append(args, *req.Duration)
+		paramIdx++
 	}
 	if req.Location != nil {
-		setClauses = append(setClauses, "location = ?")
+		setClauses = append(setClauses, fmt.Sprintf("location = $%d", paramIdx))
 		args = append(args, *req.Location)
+		paramIdx++
 	}
 	if req.InstructorID != nil {
-		setClauses = append(setClauses, "instructor_id = ?")
+		setClauses = append(setClauses, fmt.Sprintf("instructor_id = $%d", paramIdx))
 		args = append(args, *req.InstructorID)
+		paramIdx++
 	}
 	if req.Status != nil {
-		setClauses = append(setClauses, "status = ?")
+		setClauses = append(setClauses, fmt.Sprintf("status = $%d", paramIdx))
 		args = append(args, *req.Status)
+		paramIdx++
 	}
 
 	if len(setClauses) == 0 && len(req.Attendees) == 0 {
@@ -124,7 +132,7 @@ func (r *EventRepository) Update(id string, req UpdateEventRequest) (*TrainingEv
 		for i := 1; i < len(setClauses); i++ {
 			query += ", " + setClauses[i]
 		}
-		query += " WHERE id = ?"
+		query += fmt.Sprintf(" WHERE id = $%d", paramIdx)
 		args = append(args, id)
 
 		_, err := r.DB.Exec(query, args...)
@@ -134,9 +142,9 @@ func (r *EventRepository) Update(id string, req UpdateEventRequest) (*TrainingEv
 	}
 
 	if req.Attendees != nil {
-		r.DB.Exec("DELETE FROM event_attendance WHERE event_id = ?", id)
+		r.DB.Exec("DELETE FROM event_attendance WHERE event_id = $1", id)
 		for _, attendeeID := range req.Attendees {
-			r.DB.Exec("INSERT INTO event_attendance (event_id, employee_id) VALUES (?, ?)", id, attendeeID)
+			r.DB.Exec("INSERT INTO event_attendance (event_id, employee_id) VALUES ($1, $2)", id, attendeeID)
 		}
 	}
 
@@ -153,19 +161,19 @@ func (r *EventRepository) ConfirmAttendance(eventID string, employeeIDs []string
 	}
 
 	var validityMonths int
-	err = r.DB.QueryRow("SELECT validity_months FROM courses WHERE id = ?", event.CourseID).Scan(&validityMonths)
+	err = r.DB.QueryRow("SELECT validity_months FROM courses WHERE id = $1", event.CourseID).Scan(&validityMonths)
 	if err != nil {
 		validityMonths = 12
 	}
 
-	r.DB.Exec("DELETE FROM event_attendance WHERE event_id = ?", eventID)
+	r.DB.Exec("DELETE FROM event_attendance WHERE event_id = $1", eventID)
 
 	for _, empID := range employeeIDs {
-		r.DB.Exec("INSERT INTO event_attendance (event_id, employee_id) VALUES (?, ?)", eventID, empID)
+		r.DB.Exec("INSERT INTO event_attendance (event_id, employee_id) VALUES ($1, $2)", eventID, empID)
 		evidenceRepo.CreateFromAttendance(empID, event.CourseID, event.Date, validityMonths)
 	}
 
-	_, err = r.DB.Exec("UPDATE training_events SET status = 'completed' WHERE id = ?", eventID)
+	_, err = r.DB.Exec("UPDATE training_events SET status = 'completed' WHERE id = $1", eventID)
 	return err
 }
 
@@ -179,25 +187,25 @@ func (r *EventRepository) EnhancedConfirmAttendance(eventID string, req ConfirmA
 	}
 
 	var validityMonths int
-	err = r.DB.QueryRow("SELECT validity_months FROM courses WHERE id = ?", event.CourseID).Scan(&validityMonths)
+	err = r.DB.QueryRow("SELECT validity_months FROM courses WHERE id = $1", event.CourseID).Scan(&validityMonths)
 	if err != nil {
 		validityMonths = 12
 	}
 
-	r.DB.Exec("DELETE FROM event_attendance WHERE event_id = ?", eventID)
+	r.DB.Exec("DELETE FROM event_attendance WHERE event_id = $1", eventID)
 
 	for _, a := range req.Attendees {
 		if a.Attended {
-			r.DB.Exec("INSERT INTO event_attendance (event_id, employee_id) VALUES (?, ?)", eventID, a.EmployeeID)
+			r.DB.Exec("INSERT INTO event_attendance (event_id, employee_id) VALUES ($1, $2)", eventID, a.EmployeeID)
 			evidenceRepo.CreateFromAttendance(a.EmployeeID, event.CourseID, event.Date, validityMonths)
 		}
 	}
 
 	for _, w := range req.WalkIns {
-		r.DB.Exec("INSERT INTO event_attendance (event_id, employee_id) VALUES (?, ?)", eventID, w.EmployeeID)
+		r.DB.Exec("INSERT INTO event_attendance (event_id, employee_id) VALUES ($1, $2)", eventID, w.EmployeeID)
 		evidenceRepo.CreateFromAttendance(w.EmployeeID, event.CourseID, event.Date, validityMonths)
 	}
 
-	_, err = r.DB.Exec("UPDATE training_events SET status = 'completed' WHERE id = ?", eventID)
+	_, err = r.DB.Exec("UPDATE training_events SET status = 'completed' WHERE id = $1", eventID)
 	return err
 }

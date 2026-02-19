@@ -30,7 +30,7 @@ func (r *EmployeeRepository) GetAll() ([]Employee, error) {
 
 func (r *EmployeeRepository) GetByID(id string) (*Employee, error) {
 	var e Employee
-	err := r.DB.QueryRow("SELECT id, name, department, site, worker_type, cost_center, employment_status FROM employees WHERE id = ?", id).
+	err := r.DB.QueryRow("SELECT id, name, department, site, worker_type, cost_center, employment_status FROM employees WHERE id = $1", id).
 		Scan(&e.ID, &e.Name, &e.Department, &e.Site, &e.WorkerType, &e.CostCenter, &e.EmploymentStatus)
 	if err == sql.ErrNoRows {
 		return nil, nil
@@ -44,9 +44,9 @@ func (r *EmployeeRepository) GetByID(id string) (*Employee, error) {
 func (r *EmployeeRepository) Search(query string) ([]Employee, error) {
 	query = strings.ToLower(query)
 	rows, err := r.DB.Query(`
-		SELECT id, name, department, site, worker_type, cost_center, employment_status 
-		FROM employees 
-		WHERE LOWER(id) LIKE ? OR LOWER(name) LIKE ? OR LOWER(department) LIKE ?
+		SELECT id, name, department, site, worker_type, cost_center, employment_status
+		FROM employees
+		WHERE LOWER(id) LIKE $1 OR LOWER(name) LIKE $2 OR LOWER(department) LIKE $3
 	`, "%"+query+"%", "%"+query+"%", "%"+query+"%")
 	if err != nil {
 		return nil, err
@@ -65,7 +65,7 @@ func (r *EmployeeRepository) Search(query string) ([]Employee, error) {
 }
 
 func (r *EmployeeRepository) GetAssignments(employeeID string) ([]string, error) {
-	rows, err := r.DB.Query("SELECT profile_id FROM profile_assignments WHERE employee_id = ?", employeeID)
+	rows, err := r.DB.Query("SELECT profile_id FROM profile_assignments WHERE employee_id = $1", employeeID)
 	if err != nil {
 		return nil, err
 	}
@@ -85,14 +85,17 @@ func (r *EmployeeRepository) GetAssignments(employeeID string) ([]string, error)
 func (r *EmployeeRepository) GetByFilter(department, site string) ([]Employee, error) {
 	query := "SELECT id, name, department, site, worker_type, cost_center, employment_status FROM employees WHERE 1=1"
 	args := make([]interface{}, 0)
+	paramIdx := 1
 
 	if department != "" {
-		query += " AND department = ?"
+		query += fmt.Sprintf(" AND department = $%d", paramIdx)
 		args = append(args, department)
+		paramIdx++
 	}
 	if site != "" {
-		query += " AND site = ?"
+		query += fmt.Sprintf(" AND site = $%d", paramIdx)
 		args = append(args, site)
+		paramIdx++
 	}
 
 	rows, err := r.DB.Query(query, args...)
@@ -142,7 +145,7 @@ func (r *ProfileRepository) GetAll() ([]Profile, error) {
 func (r *ProfileRepository) GetByID(id string) (*Profile, error) {
 	var p Profile
 	var desc sql.NullString
-	err := r.DB.QueryRow("SELECT id, name, description FROM profiles WHERE id = ?", id).
+	err := r.DB.QueryRow("SELECT id, name, description FROM profiles WHERE id = $1", id).
 		Scan(&p.ID, &p.Name, &desc)
 	if err == sql.ErrNoRows {
 		return nil, nil
@@ -158,7 +161,7 @@ func (r *ProfileRepository) GetByID(id string) (*Profile, error) {
 
 func (r *ProfileRepository) Create(profile *Profile) error {
 	_, err := r.DB.Exec(
-		"INSERT INTO profiles (id, name, description) VALUES (?, ?, ?)",
+		"INSERT INTO profiles (id, name, description) VALUES ($1, $2, $3)",
 		profile.ID, profile.Name, profile.Description,
 	)
 	return err
@@ -178,7 +181,7 @@ func (r *ProfileRepository) GetRequirements(profileID string) ([]Requirement, er
 		SELECT r.id, r.profile_id, r.course_id, c.name, c.type, c.validity_months
 		FROM requirements r
 		JOIN courses c ON r.course_id = c.id
-		WHERE r.profile_id = ?
+		WHERE r.profile_id = $1
 	`, profileID)
 	if err != nil {
 		return nil, err
@@ -222,14 +225,14 @@ func (r *ProfileRepository) AddRequirement(profileID, courseID string) error {
 	// Get course details
 	var name, courseType string
 	var validityMonths int
-	err := r.DB.QueryRow("SELECT name, type, validity_months FROM courses WHERE id = ?", courseID).Scan(&name, &courseType, &validityMonths)
+	err := r.DB.QueryRow("SELECT name, type, validity_months FROM courses WHERE id = $1", courseID).Scan(&name, &courseType, &validityMonths)
 	if err != nil {
 		return err
 	}
 
 	// Generate requirement ID
 	var maxID string
-	r.DB.QueryRow("SELECT COALESCE(MAX(id), 'R000') FROM requirements WHERE profile_id = ?", profileID).Scan(&maxID)
+	r.DB.QueryRow("SELECT COALESCE(MAX(id), 'R000') FROM requirements WHERE profile_id = $1", profileID).Scan(&maxID)
 
 	num := 0
 	if len(maxID) > 1 {
@@ -238,24 +241,24 @@ func (r *ProfileRepository) AddRequirement(profileID, courseID string) error {
 	newID := fmt.Sprintf("R%d", num+1)
 
 	_, err = r.DB.Exec(
-		"INSERT INTO requirements (id, profile_id, course_id, name, type, validity_months) VALUES (?, ?, ?, ?, ?, ?)",
+		"INSERT INTO requirements (id, profile_id, course_id, name, type, validity_months) VALUES ($1, $2, $3, $4, $5, $6)",
 		newID, profileID, courseID, name, courseType, validityMonths,
 	)
 	return err
 }
 
 func (r *ProfileRepository) RemoveRequirement(profileID, requirementID string) error {
-	_, err := r.DB.Exec("DELETE FROM requirements WHERE id = ? AND profile_id = ?", requirementID, profileID)
+	_, err := r.DB.Exec("DELETE FROM requirements WHERE id = $1 AND profile_id = $2", requirementID, profileID)
 	return err
 }
 
 func (r *ProfileRepository) AddMember(profileID, employeeID string) error {
-	_, err := r.DB.Exec("INSERT OR IGNORE INTO profile_assignments (employee_id, profile_id) VALUES (?, ?)", employeeID, profileID)
+	_, err := r.DB.Exec("INSERT INTO profile_assignments (employee_id, profile_id) VALUES ($1, $2) ON CONFLICT DO NOTHING", employeeID, profileID)
 	return err
 }
 
 func (r *ProfileRepository) RemoveMember(profileID, employeeID string) error {
-	_, err := r.DB.Exec("DELETE FROM profile_assignments WHERE employee_id = ? AND profile_id = ?", employeeID, profileID)
+	_, err := r.DB.Exec("DELETE FROM profile_assignments WHERE employee_id = $1 AND profile_id = $2", employeeID, profileID)
 	return err
 }
 
@@ -287,7 +290,7 @@ func (r *ProfileRepository) GetMembers(profileID string) ([]ProfileMember, error
 		SELECT e.id, e.name, e.department, e.site, pa.assigned_at
 		FROM employees e
 		JOIN profile_assignments pa ON e.id = pa.employee_id
-		WHERE pa.profile_id = ?
+		WHERE pa.profile_id = $1
 		ORDER BY e.name
 	`, profileID)
 	if err != nil {
@@ -317,7 +320,7 @@ func (r *ProfileRepository) GetExclusions(profileID string) ([]ProfileExclusion,
 		SELECT pe.id, pe.profile_id, pe.employee_id, COALESCE(e.name, ''), pe.reason, pe.expiry_date, pe.created_at, COALESCE(pe.created_by, 'admin')
 		FROM profile_exclusions pe
 		LEFT JOIN employees e ON pe.employee_id = e.id
-		WHERE pe.profile_id = ?
+		WHERE pe.profile_id = $1
 		ORDER BY pe.created_at DESC
 	`, profileID)
 	if err != nil {
@@ -344,11 +347,12 @@ func (r *ProfileRepository) CreateExclusion(profileID string, req CreateExclusio
 	id := fmt.Sprintf("EX-%s-%s", req.EmployeeID, profileID)
 
 	// Remove existing assignment first
-	r.DB.Exec("DELETE FROM profile_assignments WHERE employee_id = ? AND profile_id = ?", req.EmployeeID, profileID)
+	r.DB.Exec("DELETE FROM profile_assignments WHERE employee_id = $1 AND profile_id = $2", req.EmployeeID, profileID)
 
 	_, err := r.DB.Exec(`
-		INSERT OR REPLACE INTO profile_exclusions (id, employee_id, profile_id, reason, expiry_date, created_by)
-		VALUES (?, ?, ?, ?, ?, 'admin')
+		INSERT INTO profile_exclusions (id, employee_id, profile_id, reason, expiry_date, created_by)
+		VALUES ($1, $2, $3, $4, $5, 'admin')
+		ON CONFLICT (id) DO UPDATE SET reason = EXCLUDED.reason, expiry_date = EXCLUDED.expiry_date
 	`, id, req.EmployeeID, profileID, req.Reason, req.ExpiryDate)
 	if err != nil {
 		return nil, err
@@ -356,7 +360,7 @@ func (r *ProfileRepository) CreateExclusion(profileID string, req CreateExclusio
 
 	// Get employee name
 	var name string
-	r.DB.QueryRow("SELECT name FROM employees WHERE id = ?", req.EmployeeID).Scan(&name)
+	r.DB.QueryRow("SELECT name FROM employees WHERE id = $1", req.EmployeeID).Scan(&name)
 
 	return &ProfileExclusion{
 		ID:           id,
@@ -376,7 +380,7 @@ func (r *ProfileRepository) GetExclusionByID(exclusionID string) (*ProfileExclus
 		SELECT pe.id, pe.profile_id, pe.employee_id, COALESCE(e.name, ''), pe.reason, pe.expiry_date, pe.created_at, COALESCE(pe.created_by, 'admin')
 		FROM profile_exclusions pe
 		LEFT JOIN employees e ON pe.employee_id = e.id
-		WHERE pe.id = ?
+		WHERE pe.id = $1
 	`, exclusionID).Scan(&ex.ID, &ex.ProfileID, &ex.EmployeeID, &ex.EmployeeName, &ex.Reason, &ex.ExpiryDate, &createdAt, &ex.CreatedBy)
 	if err == sql.ErrNoRows {
 		return nil, nil
@@ -391,13 +395,13 @@ func (r *ProfileRepository) GetExclusionByID(exclusionID string) (*ProfileExclus
 }
 
 func (r *ProfileRepository) UpdateExclusion(exclusionID string, req UpdateExclusionRequest) error {
-	_, err := r.DB.Exec("UPDATE profile_exclusions SET reason = ?, expiry_date = ? WHERE id = ?",
+	_, err := r.DB.Exec("UPDATE profile_exclusions SET reason = $1, expiry_date = $2 WHERE id = $3",
 		req.Reason, req.ExpiryDate, exclusionID)
 	return err
 }
 
 func (r *ProfileRepository) DeleteExclusion(exclusionID string) error {
-	_, err := r.DB.Exec("DELETE FROM profile_exclusions WHERE id = ?", exclusionID)
+	_, err := r.DB.Exec("DELETE FROM profile_exclusions WHERE id = $1", exclusionID)
 	return err
 }
 

@@ -12,26 +12,28 @@ const seedVersion = 2
 
 func Run(db *sql.DB) error {
 	ctx := context.Background()
-	tx, err := db.BeginTx(ctx, nil)
-	if err != nil {
-		return err
+
+	// Create seed_versions table outside any transaction to avoid PostgreSQL
+	// transaction-abort cascade when the table doesn't exist yet.
+	if _, err := db.ExecContext(ctx, "CREATE TABLE IF NOT EXISTS seed_versions (version INTEGER PRIMARY KEY)"); err != nil {
+		return fmt.Errorf("failed to create seed_versions table: %w", err)
 	}
-	defer tx.Rollback()
 
 	var currentVersion int
-	err = tx.QueryRowContext(ctx, "SELECT COALESCE(MAX(version), 0) FROM seed_versions").Scan(&currentVersion)
-	if err != nil {
-		_, createErr := tx.ExecContext(ctx, "CREATE TABLE IF NOT EXISTS seed_versions (version INTEGER PRIMARY KEY)")
-		if createErr != nil {
-			return createErr
-		}
-		currentVersion = 0
+	if err := db.QueryRowContext(ctx, "SELECT COALESCE(MAX(version), 0) FROM seed_versions").Scan(&currentVersion); err != nil {
+		return fmt.Errorf("failed to read seed version: %w", err)
 	}
 
 	if currentVersion >= seedVersion {
 		log.Println("Database already seeded.")
 		return nil
 	}
+
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
 
 	log.Println("Seeding database...")
 
@@ -61,7 +63,7 @@ func Run(db *sql.DB) error {
 	}
 
 	for _, e := range employees {
-		_, err := tx.ExecContext(ctx, `INSERT INTO employees VALUES (?, ?, ?, ?, ?, ?, ?)`,
+		_, err := tx.ExecContext(ctx, `INSERT INTO employees VALUES ($1, $2, $3, $4, $5, $6, $7)`,
 			e.ID, e.Name, e.Dept, e.Site, e.WorkerType, e.CostCenter, e.Status)
 		if err != nil {
 			return fmt.Errorf("failed to insert employee %s: %w", e.ID, err)
@@ -95,7 +97,7 @@ func Run(db *sql.DB) error {
 	for _, c := range courses {
 		_, err := tx.ExecContext(ctx, `
 			INSERT INTO courses (id, name, type, validity_months)
-			VALUES (?, ?, ?, ?)
+			VALUES ($1, $2, $3, $4)
 		`, c.ID, c.Name, c.Type, c.Validity)
 		if err != nil {
 			return fmt.Errorf("failed to insert course %s: %w", c.ID, err)
@@ -111,7 +113,7 @@ func Run(db *sql.DB) error {
 		{"P4", "HR Management (Compliance)", "HR compliance and regulatory training"},
 	}
 	for _, p := range profiles {
-		_, err := tx.ExecContext(ctx, `INSERT INTO profiles (id, name, description) VALUES (?, ?, ?)`, p.ID, p.Name, p.Description)
+		_, err := tx.ExecContext(ctx, `INSERT INTO profiles (id, name, description) VALUES ($1, $2, $3)`, p.ID, p.Name, p.Description)
 		if err != nil {
 			return fmt.Errorf("failed to insert profile %s: %w", p.ID, err)
 		}
@@ -143,7 +145,7 @@ func Run(db *sql.DB) error {
 	for _, r := range requirements {
 		_, err := tx.ExecContext(ctx, `
 			INSERT INTO requirements (id, profile_id, name, type, validity_months, course_id)
-			VALUES (?, ?, ?, ?, ?, ?)
+			VALUES ($1, $2, $3, $4, $5, $6)
 		`, r.ID, r.ProfileID, r.Name, r.Type, r.Validity, r.CourseID)
 		if err != nil {
 			return fmt.Errorf("failed to insert requirement %s: %w", r.ID, err)
@@ -152,7 +154,7 @@ func Run(db *sql.DB) error {
 
 	for i := 1001; i <= 1020; i++ {
 		empID := fmt.Sprintf("E%d", i)
-		_, err := tx.ExecContext(ctx, `INSERT INTO profile_assignments (employee_id, profile_id) VALUES (?, ?)`, empID, "P1")
+		_, err := tx.ExecContext(ctx, `INSERT INTO profile_assignments (employee_id, profile_id) VALUES ($1, $2)`, empID, "P1")
 		if err != nil {
 			return fmt.Errorf("failed to assign P1 to %s: %w", empID, err)
 		}
@@ -160,7 +162,7 @@ func Run(db *sql.DB) error {
 
 	welderEmployees := []string{"E1001", "E1005", "E1013", "E1015", "E1018"}
 	for _, empID := range welderEmployees {
-		_, err := tx.ExecContext(ctx, `INSERT INTO profile_assignments (employee_id, profile_id) VALUES (?, ?)`, empID, "P2")
+		_, err := tx.ExecContext(ctx, `INSERT INTO profile_assignments (employee_id, profile_id) VALUES ($1, $2)`, empID, "P2")
 		if err != nil {
 			return fmt.Errorf("failed to assign P2 to %s: %w", empID, err)
 		}
@@ -168,7 +170,7 @@ func Run(db *sql.DB) error {
 
 	forkliftEmployees := []string{"E1002", "E1005", "E1010", "E1011", "E1016", "E1020"}
 	for _, empID := range forkliftEmployees {
-		_, err := tx.ExecContext(ctx, `INSERT INTO profile_assignments (employee_id, profile_id) VALUES (?, ?)`, empID, "P3")
+		_, err := tx.ExecContext(ctx, `INSERT INTO profile_assignments (employee_id, profile_id) VALUES ($1, $2)`, empID, "P3")
 		if err != nil {
 			return fmt.Errorf("failed to assign P3 to %s: %w", empID, err)
 		}
@@ -176,7 +178,7 @@ func Run(db *sql.DB) error {
 
 	hrEmployees := []string{"E1008", "E1014"}
 	for _, empID := range hrEmployees {
-		_, err := tx.ExecContext(ctx, `INSERT INTO profile_assignments (employee_id, profile_id) VALUES (?, ?)`, empID, "P4")
+		_, err := tx.ExecContext(ctx, `INSERT INTO profile_assignments (employee_id, profile_id) VALUES ($1, $2)`, empID, "P4")
 		if err != nil {
 			return fmt.Errorf("failed to assign P4 to %s: %w", empID, err)
 		}
@@ -189,7 +191,7 @@ func Run(db *sql.DB) error {
 	createEvidence := func(id, empID, courseID, evidenceType, completionDate, expiryDate string) error {
 		_, err := tx.ExecContext(ctx, `
 			INSERT INTO evidence (id, employee_id, course_id, requirement_name, evidence_type, completion_date, expiry_date, metadata)
-			VALUES (?, ?, ?, '', ?, ?, ?, ?)
+			VALUES ($1, $2, $3, '', $4, $5, $6, $7)
 		`, id, empID, courseID, evidenceType, completionDate, expiryDate, "")
 		return err
 	}
@@ -284,7 +286,7 @@ func Run(db *sql.DB) error {
 	for _, e := range events {
 		_, err := tx.ExecContext(ctx, `
 			INSERT INTO training_events (id, course_id, course_name, date, time, duration, location, instructor_id, status)
-			VALUES (?, ?, '', ?, ?, ?, ?, ?, ?)
+			VALUES ($1, $2, '', $3, $4, $5, $6, $7, $8)
 		`, e.ID, e.CourseID, e.Date, e.Time, e.Duration, e.Location, e.InstructorID, e.Status)
 		if err != nil {
 			return fmt.Errorf("failed to insert event %s: %w", e.ID, err)
@@ -293,12 +295,12 @@ func Run(db *sql.DB) error {
 
 	te001Attendees := []string{"E1001", "E1002", "E1003", "E1004", "E1009"}
 	for _, empID := range te001Attendees {
-		tx.ExecContext(ctx, `INSERT INTO event_attendance (event_id, employee_id) VALUES (?, ?)`, "TE001", empID)
+		tx.ExecContext(ctx, `INSERT INTO event_attendance (event_id, employee_id) VALUES ($1, $2)`, "TE001", empID)
 	}
 
 	te002Attendees := []string{"E1005", "E1006", "E1010", "E1013", "E1014", "E1016", "E1020"}
 	for _, empID := range te002Attendees {
-		tx.ExecContext(ctx, `INSERT INTO event_attendance (event_id, employee_id) VALUES (?, ?)`, "TE002", empID)
+		tx.ExecContext(ctx, `INSERT INTO event_attendance (event_id, employee_id) VALUES ($1, $2)`, "TE002", empID)
 	}
 
 	exclusions := []struct {
@@ -311,14 +313,14 @@ func Run(db *sql.DB) error {
 	for _, ex := range exclusions {
 		_, err := tx.ExecContext(ctx, `
 			INSERT INTO profile_exclusions (id, employee_id, profile_id, reason, expiry_date, created_by)
-			VALUES (?, ?, ?, ?, ?, 'admin')
+			VALUES ($1, $2, $3, $4, $5, 'admin')
 		`, ex.ID, ex.EmployeeID, ex.ProfileID, ex.Reason, ex.ExpiryDate)
 		if err != nil {
 			return fmt.Errorf("failed to insert exclusion %s: %w", ex.ID, err)
 		}
 	}
 
-	_, err = tx.ExecContext(ctx, "INSERT INTO seed_versions (version) VALUES (?)", seedVersion)
+	_, err = tx.ExecContext(ctx, "INSERT INTO seed_versions (version) VALUES ($1)", seedVersion)
 	if err != nil {
 		return fmt.Errorf("failed to update seed version: %w", err)
 	}

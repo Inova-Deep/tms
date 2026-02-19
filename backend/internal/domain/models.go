@@ -231,3 +231,252 @@ type MatrixResponse struct {
 	Courses []Course    `json:"courses"`
 	Rows    []MatrixRow `json:"rows"`
 }
+
+// =============================================================================
+// DML Competence Assurance Models
+// =============================================================================
+
+// Role represents a job function with defined competence requirements
+type Role struct {
+	ID               string `json:"id"`
+	Name             string `json:"name"`
+	Department       string `json:"department"`
+	SkillCategory    string `json:"skillCategory"`
+	RiskLevel        string `json:"riskLevel"`       // safety_critical, quality_critical, low, medium
+	Criticality      string `json:"criticality"`     // safety, quality, compliance
+	MandatoryForRole bool   `json:"mandatoryForRole"`
+	MatrixApplicable *bool  `json:"matrixApplicable"` // nil = no decision yet
+	CreatedAt        string `json:"createdAt"`
+	UpdatedAt        string `json:"updatedAt"`
+}
+
+type CreateRoleRequest struct {
+	Name             string `json:"name"`
+	Department       string `json:"department"`
+	SkillCategory    string `json:"skillCategory"`
+	RiskLevel        string `json:"riskLevel"`
+	Criticality      string `json:"criticality"`
+	MandatoryForRole bool   `json:"mandatoryForRole"`
+}
+
+type UpdateRoleRequest struct {
+	Name             *string `json:"name,omitempty"`
+	Department       *string `json:"department,omitempty"`
+	SkillCategory    *string `json:"skillCategory,omitempty"`
+	RiskLevel        *string `json:"riskLevel,omitempty"`
+	Criticality      *string `json:"criticality,omitempty"`
+	MandatoryForRole *bool   `json:"mandatoryForRole,omitempty"`
+}
+
+// ApplicabilityDecision records the 5-question gate result for a role (DML-QA-REG-5024-1)
+type ApplicabilityDecision struct {
+	ID                   string  `json:"id"`
+	RoleID               string  `json:"roleId"`
+	Q1                   bool    `json:"q1"`
+	Q2                   bool    `json:"q2"`
+	Q3                   bool    `json:"q3"`
+	Q4                   bool    `json:"q4"`
+	Q5                   bool    `json:"q5"`
+	Result               string  `json:"result"` // matrix or awareness
+	DecidedBy            string  `json:"decidedBy"`
+	DecidedAt            string  `json:"decidedAt"`
+	Escalated            bool    `json:"escalated"`
+	EscalationNotes      *string `json:"escalationNotes,omitempty"`
+	EscalationResolvedAt *string `json:"escalationResolvedAt,omitempty"`
+	EscalationResolvedBy *string `json:"escalationResolvedBy,omitempty"`
+}
+
+type CreateApplicabilityDecisionRequest struct {
+	Q1              bool   `json:"q1"`
+	Q2              bool   `json:"q2"`
+	Q3              bool   `json:"q3"`
+	Q4              bool   `json:"q4"`
+	Q5              bool   `json:"q5"`
+	DecidedBy       string `json:"decidedBy"`
+	Escalated       bool   `json:"escalated"`
+	EscalationNotes string `json:"escalationNotes,omitempty"`
+}
+
+type ResolveEscalationRequest struct {
+	ResolvedBy string `json:"resolvedBy"`
+	Notes      string `json:"notes"`
+}
+
+// InductionRecord records HR new starter induction (Section 3.3)
+type InductionRecord struct {
+	ID                   string   `json:"id"`
+	EmployeeID           string   `json:"employeeId"`
+	ConductedBy          string   `json:"conductedBy"`
+	InductionDate        string   `json:"inductionDate"`
+	TopicsCovered        []string `json:"topicsCovered"`
+	EmployeeSignatureRef *string  `json:"employeeSignatureRef,omitempty"`
+	Completed            bool     `json:"completed"`
+	CreatedAt            string   `json:"createdAt"`
+}
+
+type CreateInductionRequest struct {
+	EmployeeID           string   `json:"employeeId"`
+	ConductedBy          string   `json:"conductedBy"`
+	InductionDate        string   `json:"inductionDate"`
+	TopicsCovered        []string `json:"topicsCovered"`
+	EmployeeSignatureRef *string  `json:"employeeSignatureRef,omitempty"`
+}
+
+// WorkAuthorization records manager sign-off for independent work (Section 3.2.1)
+type WorkAuthorization struct {
+	ID                 string  `json:"id"`
+	EmployeeID         string  `json:"employeeId"`
+	RequirementID      *string `json:"requirementId,omitempty"`
+	AuthorizationType  string  `json:"authorizationType"`  // independent, supervised, restricted
+	AuthorizationState string  `json:"authorizationState"` // AUTHORIZED, PENDING_AUTHORIZATION, LEGACY_PENDING, etc.
+	AuthorizedBy       *string `json:"authorizedBy,omitempty"`
+	AuthorizedAt       *string `json:"authorizedAt,omitempty"`
+	ExpiryDate         *string `json:"expiryDate,omitempty"`
+	RevokedAt          *string `json:"revokedAt,omitempty"`
+	RevokeReason       *string `json:"revokeReason,omitempty"`
+	IsLegacy           bool    `json:"isLegacy"`
+	Notes              *string `json:"notes,omitempty"`
+	CreatedAt          string  `json:"createdAt"`
+}
+
+type CreateWorkAuthorizationRequest struct {
+	EmployeeID        string  `json:"employeeId"`
+	RequirementID     *string `json:"requirementId,omitempty"`
+	AuthorizationType string  `json:"authorizationType"`
+	AuthorizedBy      string  `json:"authorizedBy"`
+	ExpiryDate        *string `json:"expiryDate,omitempty"`
+	Notes             *string `json:"notes,omitempty"`
+}
+
+type RevokeAuthorizationRequest struct {
+	RevokedBy    string `json:"revokedBy"`
+	RevokeReason string `json:"revokeReason"`
+}
+
+// CompetenceAssessment records formal assessment for critical work (Section 3.2.3)
+type CompetenceAssessment struct {
+	ID                    string  `json:"id"`
+	EmployeeID            string  `json:"employeeId"`
+	RequirementID         *string `json:"requirementId,omitempty"`
+	AssessedBy            string  `json:"assessedBy"`
+	AssessmentDate        string  `json:"assessmentDate"`
+	WorkActivitiesCovered string  `json:"workActivitiesCovered"`
+	Limitations           *string `json:"limitations,omitempty"`
+	SupervisionRequired   bool    `json:"supervisionRequired"`
+	Outcome               string  `json:"outcome"` // competent, not_yet_competent, supervised
+	EvidenceReference     *string `json:"evidenceReference,omitempty"`
+	Notes                 *string `json:"notes,omitempty"`
+	CreatedAt             string  `json:"createdAt"`
+}
+
+type CreateCompetenceAssessmentRequest struct {
+	EmployeeID            string  `json:"employeeId"`
+	RequirementID         *string `json:"requirementId,omitempty"`
+	AssessedBy            string  `json:"assessedBy"`
+	AssessmentDate        string  `json:"assessmentDate"`
+	WorkActivitiesCovered string  `json:"workActivitiesCovered"`
+	Limitations           *string `json:"limitations,omitempty"`
+	SupervisionRequired   bool    `json:"supervisionRequired"`
+	Outcome               string  `json:"outcome"`
+	EvidenceReference     *string `json:"evidenceReference,omitempty"`
+	Notes                 *string `json:"notes,omitempty"`
+}
+
+// SupervisionPeriod tracks supervised work periods (Section 3.2.4)
+type SupervisionPeriod struct {
+	ID                     string  `json:"id"`
+	EmployeeID             string  `json:"employeeId"`
+	SupervisorID           string  `json:"supervisorId"`
+	RequirementID          *string `json:"requirementId,omitempty"`
+	ScopeLimitations       *string `json:"scopeLimitations,omitempty"`
+	StartDate              string  `json:"startDate"`
+	EndDate                *string `json:"endDate,omitempty"`
+	Status                 string  `json:"status"` // active, completed, abandoned
+	CompletionAssessmentID *string `json:"completionAssessmentId,omitempty"`
+	CreatedAt              string  `json:"createdAt"`
+}
+
+type CreateSupervisionPeriodRequest struct {
+	EmployeeID       string  `json:"employeeId"`
+	SupervisorID     string  `json:"supervisorId"`
+	RequirementID    *string `json:"requirementId,omitempty"`
+	ScopeLimitations *string `json:"scopeLimitations,omitempty"`
+	StartDate        string  `json:"startDate"`
+}
+
+type CompleteSupervisionRequest struct {
+	EndDate      string  `json:"endDate"`
+	AssessmentID *string `json:"assessmentId,omitempty"`
+}
+
+// ReassessmentTrigger records non-calendar reassessment triggers (Section 3.2.5)
+type ReassessmentTrigger struct {
+	ID                     string  `json:"id"`
+	EmployeeID             string  `json:"employeeId"`
+	RequirementID          *string `json:"requirementId,omitempty"`
+	TriggerType            string  `json:"triggerType"` // repeated_errors, process_change, extended_absence, cert_expiry, performance_concern
+	TriggeredBy            string  `json:"triggeredBy"`
+	TriggeredAt            string  `json:"triggeredAt"`
+	Notes                  string  `json:"notes"`
+	ResolvedAt             *string `json:"resolvedAt,omitempty"`
+	ResolutionNotes        *string `json:"resolutionNotes,omitempty"`
+	ResolutionAssessmentID *string `json:"resolutionAssessmentId,omitempty"`
+}
+
+type CreateReassessmentTriggerRequest struct {
+	EmployeeID    string  `json:"employeeId"`
+	RequirementID *string `json:"requirementId,omitempty"`
+	TriggerType   string  `json:"triggerType"`
+	TriggeredBy   string  `json:"triggeredBy"`
+	Notes         string  `json:"notes"`
+}
+
+type ResolveReassessmentRequest struct {
+	ResolutionNotes string  `json:"resolutionNotes"`
+	AssessmentID    *string `json:"assessmentId,omitempty"`
+}
+
+// TrainingEffectivenessEvaluation records whether training was applied in practice (Section 4.4)
+type TrainingEffectivenessEvaluation struct {
+	ID             string  `json:"id"`
+	EvidenceID     *string `json:"evidenceId,omitempty"`
+	EvaluatedBy    string  `json:"evaluatedBy"`
+	EvaluationDate string  `json:"evaluationDate"`
+	Method         string  `json:"method"`  // observation, supervision, error_reduction, output_review, feedback
+	Outcome        string  `json:"outcome"` // effective, partially_effective, ineffective
+	FollowUpAction *string `json:"followUpAction,omitempty"`
+	CreatedAt      string  `json:"createdAt"`
+}
+
+type CreateEffectivenessEvaluationRequest struct {
+	EvidenceID     *string `json:"evidenceId,omitempty"`
+	EvaluatedBy    string  `json:"evaluatedBy"`
+	EvaluationDate string  `json:"evaluationDate"`
+	Method         string  `json:"method"`
+	Outcome        string  `json:"outcome"`
+	FollowUpAction *string `json:"followUpAction,omitempty"`
+}
+
+// =============================================================================
+// DML Dashboard & Reporting Models
+// =============================================================================
+
+type CompetenceHealthResponse struct {
+	TotalMatrixRoles          int     `json:"totalMatrixRoles"`
+	AuthorizedCount           int     `json:"authorizedCount"`
+	PendingAuthorizationCount int     `json:"pendingAuthorizationCount"`
+	LegacyPendingCount        int     `json:"legacyPendingCount"`
+	ActiveSupervisionCount    int     `json:"activeSupervisionCount"`
+	OpenReassessmentsCount    int     `json:"openReassessmentsCount"`
+	AuthorizationHealthPct    float64 `json:"authorizationHealthPct"`
+}
+
+type SupervisionQueueResponse struct {
+	Active             []SupervisionPeriod `json:"active"`
+	ReadyForAssessment []SupervisionPeriod `json:"readyForAssessment"`
+}
+
+type ReassessmentAlertsResponse struct {
+	Open  []ReassessmentTrigger `json:"open"`
+	Total int                   `json:"total"`
+}
