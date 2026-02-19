@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      - PORT=8080
+      - DB_PATH=/app/data/tms.db
+    volumes:
+      - tms-data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-s", "-o", "/dev/null", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - tms-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "127.0.0.1:3000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-s", "-o", "/dev/null", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+    networks:
+      - tms-network
+
+volumes:
+  tms-data:
+    driver: local
+
+networks:
+  tms-network:
+    driver: bridge
